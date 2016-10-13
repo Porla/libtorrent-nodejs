@@ -1,0 +1,23 @@
+{
+  "name": "porla-libtorrent",
+  "version": "0.1.0",
+  "description": "Rasterbar-libtorrent bindings for Node.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Porla/libtorrent-nodejs"
+  },
+  "license": "MIT",
+  "scripts": {
+    "configure": "node-gyp configure",
+    "build": "node-gyp build",
+    "test": "mocha"
+  },
+  "devDependencies": {
+    "nan": "^2.4.0",
+    "mocha": "^2.2.5",
+    "node-gyp": "^3.4.0"
+  },
+  "dependencies": {
+    "bindings": "^1.2.1"
+  }
+}
