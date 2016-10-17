@@ -99,6 +99,16 @@ describe('libtorrent', function() {
             obj.add_dht_router("router.bittorrent.com", 6881);
         });
 
+        it("can add torrent", function() {
+            var obj = new lt.session();
+            var handle = obj.add_torrent({
+                save_path: "./",
+                ti: new lt.torrent_info("res/debian-8.5.0-amd64-netinst.iso.torrent")
+            });
+
+            assert.equal("debian-8.5.0-amd64-netinst.iso", handle.status().name);
+        });
+
         it("can load state", function() {
             var obj = new lt.session();
             obj.load_state(lt.bdecode("le"));
