@@ -29,7 +29,18 @@ libtorrent::bdecode_node& BDecodeNode::GetWrapped()
 
 NAN_METHOD(DoBDecode)
 {
-    std::string buf = *Nan::Utf8String(info[0]->ToString());
+    std::string buf;
+
+    if (info[0]->IsString())
+    {
+        buf = *Nan::Utf8String(info[0]);
+    }
+    else
+    {
+        buf = std::string(
+            node::Buffer::Data(info[0]),
+            node::Buffer::Length(info[0]));
+    }
 
     std::unique_ptr<BDecodeNode::State> state = std::make_unique<BDecodeNode::State>();
     state->buffer = std::make_unique<std::string>(buf);

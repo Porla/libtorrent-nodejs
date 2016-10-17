@@ -5,6 +5,7 @@
 
 namespace libtorrent
 {
+    struct add_torrent_params;
     class session;
 }
 
@@ -19,7 +20,11 @@ namespace lt
         explicit Session();
         ~Session();
 
+        static libtorrent::add_torrent_params GetAddTorrentParams(const v8::Local<v8::Object>& object);
+
         static NAN_METHOD(AddDhtRouter);
+        static NAN_METHOD(AddTorrent);
+        static NAN_METHOD(AsyncAddTorrent);
         static NAN_METHOD(IsListening);
         static NAN_METHOD(IsPaused);
         static NAN_METHOD(LoadState);

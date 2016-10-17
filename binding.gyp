@@ -26,7 +26,10 @@
                 "src/add_torrent_params.cc",
                 "src/bdecode.cc",
                 "src/read_resume_data.cc",
-                "src/session.cc"
+                "src/session.cc",
+                "src/torrent_handle.cc",
+                "src/torrent_info.cc",
+                "src/torrent_status.cc"
             ],
 
             "include_dirs" : [
