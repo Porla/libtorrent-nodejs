@@ -53,7 +53,6 @@ v8::Local<v8::Object> TorrentStatus::CreateObject(v8::Isolate* isolate, libtorre
 
     status->Set(Nan::New("ip_filter_applies").ToLocalChecked(), Nan::New(ts.ip_filter_applies));
     status->Set(Nan::New("is_finished").ToLocalChecked(), Nan::New(ts.is_finished));
-    status->Set(Nan::New("is_loaded").ToLocalChecked(), Nan::New(ts.is_loaded));
     status->Set(Nan::New("is_seeding").ToLocalChecked(), Nan::New(ts.is_seeding));
     status->Set(Nan::New("last_scrape").ToLocalChecked(), Nan::New(ts.last_scrape));
     status->Set(Nan::New("last_seen_complete").ToLocalChecked(), Nan::New(static_cast<double>(ts.last_seen_complete)));

@@ -49,7 +49,9 @@ NAN_METHOD(TorrentInfo::New)
         else if (info.Length() > 0 && info[0]->IsObject())
         {
             BDecodeNode* node = Nan::ObjectWrap::Unwrap<BDecodeNode>(info[0]->ToObject());
-            obj = new TorrentInfo(std::make_shared<libtorrent::torrent_info>(node->GetWrapped()));
+
+            libtorrent::error_code ec;
+            obj = new TorrentInfo(std::make_shared<libtorrent::torrent_info>(node->GetWrapped(), ec));
         }
         else if (info.Length() > 0 && info[0]->IsString())
         {
