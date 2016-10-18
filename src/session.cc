@@ -4,6 +4,7 @@
 #include <libtorrent/session.hpp>
 
 #include "add_torrent_params.h"
+#include "alert_types.h"
 #include "bdecode.h"
 #include "settings_pack.h"
 #include "torrent_handle.h"
@@ -48,7 +49,6 @@ public:
     }
 
 private:
-    Nan::Callback* callback_;
     libtorrent::session* session_;
     int timeout_;
     libtorrent::alert* alert_;
@@ -224,10 +224,7 @@ NAN_METHOD(Session::PopAlerts)
 
     for (uint32_t idx = 0; idx < alerts.size(); idx++)
     {
-        v8::Local<v8::Object> al = Nan::New<v8::Object>();
-        al->Set(Nan::New("message").ToLocalChecked(), Nan::New(alerts[idx]->message()).ToLocalChecked());
-        al->Set(Nan::New("type").ToLocalChecked(), Nan::New(alerts[idx]->type()));
-
+        v8::Local<v8::Object> al = AlertTypes::ToObject(alerts.at(idx));
         arr->Set(idx, al);
     }
 

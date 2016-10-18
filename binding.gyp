@@ -27,6 +27,7 @@
             "sources": [
                 "src/libtorrent.cc",
                 "src/add_torrent_params.cc",
+                "src/alert_types.cc",
                 "src/bdecode.cc",
                 "src/read_resume_data.cc",
                 "src/session.cc",
