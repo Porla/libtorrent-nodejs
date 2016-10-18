@@ -14,6 +14,8 @@ namespace lt
     class TorrentHandle : public Nan::ObjectWrap
     {
     public:
+        libtorrent::torrent_handle& GetWrapped();
+
         static NAN_MODULE_INIT(Init);
         static v8::Local<v8::Object> NewInstance(v8::Local<v8::Value> arg);
 

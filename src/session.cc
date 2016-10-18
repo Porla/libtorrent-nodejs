@@ -3,7 +3,9 @@
 #include <libtorrent/add_torrent_params.hpp>
 #include <libtorrent/session.hpp>
 
+#include "add_torrent_params.h"
 #include "bdecode.h"
+#include "settings_pack.h"
 #include "torrent_handle.h"
 #include "torrent_info.h"
 
@@ -60,11 +62,14 @@ NAN_MODULE_INIT(Session::Init)
 
     Nan::SetPrototypeMethod(tpl, "add_dht_router", AddDhtRouter);
     Nan::SetPrototypeMethod(tpl, "add_torrent", AddTorrent);
+    Nan::SetPrototypeMethod(tpl, "apply_settings", ApplySettings);
     Nan::SetPrototypeMethod(tpl, "async_add_torrent", AsyncAddTorrent);
+    Nan::SetPrototypeMethod(tpl, "get_settings", GetSettings);
     Nan::SetPrototypeMethod(tpl, "is_listening", IsListening);
     Nan::SetPrototypeMethod(tpl, "is_paused", IsPaused);
     Nan::SetPrototypeMethod(tpl, "load_state", LoadState);
     Nan::SetPrototypeMethod(tpl, "pop_alerts", PopAlerts);
+    Nan::SetPrototypeMethod(tpl, "remove_torrent", RemoveTorrent);
     Nan::SetPrototypeMethod(tpl, "wait_for_alert", WaitForAlert);
 
     constructor.Reset(Nan::GetFunction(tpl).ToLocalChecked());
@@ -76,34 +81,40 @@ Session::Session()
     wrap_ = new libtorrent::session();
 }
 
+Session::Session(libtorrent::settings_pack& settings)
+{
+    wrap_ = new libtorrent::session(settings);
+}
+
 Session::~Session()
 {
     delete wrap_;
-}
-
-libtorrent::add_torrent_params Session::GetAddTorrentParams(const v8::Local<v8::Object>& object)
-{
-    auto ti = Nan::New("ti").ToLocalChecked();
-
-    // Validate
-    if (object->Has(ti) && !object->Get(ti)->IsObject())
-    {
-        Nan::ThrowTypeError("Property 'ti' should be an object type.");
-    }
-
-    libtorrent::add_torrent_params params;
-    params.active_time = object->Get(Nan::New("active_time").ToLocalChecked())->Int32Value();
-    params.save_path = *Nan::Utf8String(object->Get(Nan::New("save_path").ToLocalChecked())->ToString());
-    params.ti = Nan::ObjectWrap::Unwrap<TorrentInfo>(object->Get(ti)->ToObject())->GetWrapped();
-
-    return params;
 }
 
 NAN_METHOD(Session::New)
 {
     if (info.IsConstructCall())
     {
-        Session *obj = new Session();
+        Session* obj = nullptr;
+
+        if (info.Length() > 0 && info[0]->IsObject())
+        {
+            auto params = info[0]->ToObject();
+            auto settings = Nan::New("settings").ToLocalChecked();
+
+            if (params->Has(settings) && params->Get(settings)->IsObject())
+            {
+                v8::Local<v8::Object> settingsObject = params->Get(settings)->ToObject();
+                SettingsPack* pack = Nan::ObjectWrap::Unwrap<SettingsPack>(settingsObject);
+                obj = new Session(pack->GetWrapped());
+            }
+        }
+
+        if (obj == nullptr)
+        {
+            obj = new Session();
+        }
+
         obj->Wrap(info.This());
         info.GetReturnValue().Set(info.This());
     }
@@ -134,7 +145,7 @@ NAN_METHOD(Session::AddTorrent)
     Session* obj = Nan::ObjectWrap::Unwrap<Session>(info.This());
     v8::Local<v8::Object> p = info[0]->ToObject();
 
-    libtorrent::add_torrent_params params = GetAddTorrentParams(p);
+    libtorrent::add_torrent_params params = AddTorrentParams::FromObject(p);
 
     libtorrent::error_code ec;
     libtorrent::torrent_handle th = obj->wrap_->add_torrent(params, ec);
@@ -149,6 +160,14 @@ NAN_METHOD(Session::AddTorrent)
     info.GetReturnValue().Set(TorrentHandle::NewInstance(ext));
 }
 
+NAN_METHOD(Session::ApplySettings)
+{
+    Session* obj = Nan::ObjectWrap::Unwrap<Session>(info.This());
+    SettingsPack* sp = Nan::ObjectWrap::Unwrap<SettingsPack>(info[0]->ToObject());
+
+    obj->wrap_->apply_settings(sp->GetWrapped());
+}
+
 NAN_METHOD(Session::AsyncAddTorrent)
 {
     if (!info[0]->IsObject())
@@ -160,9 +179,18 @@ NAN_METHOD(Session::AsyncAddTorrent)
     Session* obj = Nan::ObjectWrap::Unwrap<Session>(info.This());
     v8::Local<v8::Object> p = info[0]->ToObject();
 
-    libtorrent::add_torrent_params params = GetAddTorrentParams(p);
+    libtorrent::add_torrent_params params = AddTorrentParams::FromObject(p);
 
     obj->wrap_->async_add_torrent(params);
+}
+
+NAN_METHOD(Session::GetSettings)
+{
+    Session* obj = Nan::ObjectWrap::Unwrap<Session>(info.This());
+    libtorrent::settings_pack sp = obj->wrap_->get_settings();
+
+    v8::Local<v8::External> ext = v8::External::New(info.GetIsolate(), static_cast<void*>(&sp));
+    info.GetReturnValue().Set(SettingsPack::NewInstance(ext));
 }
 
 NAN_METHOD(Session::IsListening)
@@ -204,6 +232,29 @@ NAN_METHOD(Session::PopAlerts)
     }
 
     info.GetReturnValue().Set(arr);
+}
+
+NAN_METHOD(Session::RemoveTorrent)
+{
+    Session* obj = Nan::ObjectWrap::Unwrap<Session>(info.This());
+    TorrentHandle* th = Nan::ObjectWrap::Unwrap<TorrentHandle>(info[0]->ToObject());
+
+    int options = 0;
+
+    if (info.Length() >= 2 && info[1]->IsObject())
+    {
+        auto params = info[1]->ToObject();
+        auto remove_files = Nan::New("delete_files").ToLocalChecked();
+
+        if (params->Has(remove_files)
+            && params->Get(remove_files)->IsBoolean()
+            && params->Get(remove_files)->ToBoolean()->Value())
+        {
+            options = libtorrent::session::options_t::delete_files;
+        }
+    }
+
+    obj->wrap_->remove_torrent(th->GetWrapped(), options);
 }
 
 NAN_METHOD(Session::WaitForAlert)

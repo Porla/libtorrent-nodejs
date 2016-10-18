@@ -9,56 +9,21 @@ function assertProperty(object, propertyName, testValue) {
 }
 
 describe('libtorrent', function() {
-    describe("add_torrent_params", function() {
-        it("can get/set active time", function() {
-            assertProperty(new lt.add_torrent_params(), 'active_time', 42);
-        });
-
-        it("can get/set added time", function() {
-            assertProperty(new lt.add_torrent_params(), 'added_time', 42);
-        });
-
-        it("can get/set completed time", function() {
-            assertProperty(new lt.add_torrent_params(), 'completed_time', 42);
-        });
-
-        it("can get/set download limit", function() {
-            assertProperty(new lt.add_torrent_params(), 'download_limit', 42);
-        });
-
-        it("can get/set file priorities", function() {
-            var p = new lt.add_torrent_params();
-            assert('file_priorities' in p);
-
-            p.file_priorities = [ 5, 10, 15 ];
-            assert.deepEqual([ 5, 10, 15 ], p.file_priorities);
-        });
-
-        it("can get/set finished time", function() {
-            assertProperty(new lt.add_torrent_params(), 'finished_time', 42);
-        });
-
-        it("can get/set save path", function() {
-            assertProperty(new lt.add_torrent_params(), 'save_path', "foo");
-        });
-
-        it("can get/set torrent info", function() {
-            var params = new lt.add_torrent_params();
-            assert.equal(null, params.ti);
-
-            params.ti = new lt.torrent_info("res/debian-8.5.0-amd64-netinst.iso.torrent");
-            assert.equal("debian-8.5.0-amd64-netinst.iso", params.ti.name);
-        });
-
-        it("can get/set url", function() {
-            assertProperty(new lt.add_torrent_params(), 'url', "foo");
-        });
-    });
-
     describe("bdecode", function() {
-        it("can bdecode", function() {
+        it("can bdecode string", function() {
             var node = lt.bdecode("li2ei3ee");
             assert.equal(node.type(), 2);
+        });
+
+        it("can bdecode buffer", function(done) {
+            fs.readFile("res/debian-8.5.0-amd64-netinst.iso.torrent", (err, data) => {
+                if (err) { throw err; }
+
+                var node = lt.bdecode(data);
+                assert.equal(node.type(), 1);
+
+                done();
+            });
         });
 
         it("throws on invalid input", function() {
@@ -94,6 +59,16 @@ describe('libtorrent', function() {
     });
 
     describe("session", function() {
+        it("accepts a settings_pack", function() {
+            var set = new lt.settings_pack();
+            set.set_bool(lt.settings_pack.bool_types.anonymous_mode, true);
+
+            var session = new lt.session({ settings: set });
+            var sessionSettings = session.get_settings();
+
+            assert.equal(true, sessionSettings.get_bool(lt.settings_pack.bool_types.anonymous_mode));
+        });
+
         it("can add dht router", function() {
             var obj = new lt.session();
             obj.add_dht_router("router.bittorrent.com", 6881);
@@ -109,9 +84,31 @@ describe('libtorrent', function() {
             assert.equal("debian-8.5.0-amd64-netinst.iso", handle.status().name);
         });
 
+        it("can apply settings", function() {
+            var obj = new lt.session();
+            obj.apply_settings(new lt.settings_pack());
+        });
+
         it("can load state", function() {
             var obj = new lt.session();
             obj.load_state(lt.bdecode("le"));
+        });
+
+        it("can remove torrent", function() {
+            var obj = new lt.session();
+            var handle = obj.add_torrent({
+                save_path: "./",
+                ti: new lt.torrent_info("res/debian-8.5.0-amd64-netinst.iso.torrent")
+            });
+            obj.remove_torrent(handle, { delete_files: true });
+        });
+
+        it("can wait for alert", function(done) {
+            var obj = new lt.session();
+            obj.wait_for_alert(10000, function(error, result) {
+                assert.equal(result, true);
+                done();
+            });
         });
 
         it("has function 'is_listening'", function() {
@@ -128,13 +125,25 @@ describe('libtorrent', function() {
             var obj = new lt.session();
             assert.equal(Array.isArray(obj.pop_alerts()), true);
         });
+    });
 
-        it("can wait for alert", function(done) {
-            var obj = new lt.session();
-            obj.wait_for_alert(10000, function(error, result) {
-                assert.equal(result, true);
-                done();
-            });
+    describe("settings_pack", function() {
+        it("can set bool", function() {
+            var settings = new lt.settings_pack();
+            settings.set_bool(lt.settings_pack.bool_types.anonymous_mode, true);
+            assert.equal(true, settings.get_bool(lt.settings_pack.bool_types.anonymous_mode));
+        });
+
+        it("can set int", function() {
+            var settings = new lt.settings_pack();
+            settings.set_int(lt.settings_pack.int_types.proxy_port, 1337);
+            assert.equal(1337, settings.get_int(lt.settings_pack.int_types.proxy_port));
+        });
+
+        it("can set string", function() {
+            var settings = new lt.settings_pack();
+            settings.set_str(lt.settings_pack.str_types.user_agent, "Porla");
+            assert.equal("Porla", settings.get_str(lt.settings_pack.str_types.user_agent));
         });
     });
 

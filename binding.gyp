@@ -1,16 +1,19 @@
 {
     "conditions": [
         [ 'OS=="win"', {
+            'variables': {
+                'boost_root%': 'C:/boost_1_62_0',
+            },
+
             'conditions': [
-                # "openssl_root" is the directory on Windows of the OpenSSL files.
-                # Check the "target_arch" variable to set good default values for
-                # both 64-bit and 32-bit builds of the module.
                 ['target_arch=="x64"', {
                     'variables': {
+                        'boostlib_root%': '<(boost_root)/lib64-msvc-14.0',
                         'openssl_root%': 'C:/OpenSSL-Win64'
                     },
                 }, {
                     'variables': {
+                        'boostlib_root%': '<(boost_root)/lib32-msvc-14.0',
                         'openssl_root%': 'C:/OpenSSL-Win32'
                     },
                 }],
@@ -27,6 +30,7 @@
                 "src/bdecode.cc",
                 "src/read_resume_data.cc",
                 "src/session.cc",
+                "src/settings_pack.cc",
                 "src/torrent_handle.cc",
                 "src/torrent_info.cc",
                 "src/torrent_status.cc"
@@ -67,16 +71,16 @@
                         "UNICODE"
                     ],
                     "include_dirs" : [
-                        "C:/Libs/boost_1_61_0",
                         "C:/Libs/libtorrent/include",
+                        '<(boost_root)/',
                         '<(openssl_root)/include',
                     ],
                     "libraries": [
-                        "-lC:/Libs/out/libboost_system-vc140-s-1_61.lib",
-                        "-lC:/Libs/out/libtorrent.lib",
+                        '-lC:/Libs/out/libtorrent.lib',
+                        '-l<(boostlib_root)/libboost_system-vc140-s-1_62.lib',
                         '-l<(openssl_root)/lib/libeay32.lib',
                         '-l<(openssl_root)/lib/ssleay32.lib',
-                        "iphlpapi.lib"
+                        '-liphlpapi'
                     ]
                 },
                   'OS=="mac"', {

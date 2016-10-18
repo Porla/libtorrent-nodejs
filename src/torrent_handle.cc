@@ -19,6 +19,11 @@ TorrentHandle::~TorrentHandle()
 {
 }
 
+libtorrent::torrent_handle& TorrentHandle::GetWrapped()
+{
+    return *th_.get();
+}
+
 NAN_MODULE_INIT(TorrentHandle::Init)
 {
     v8::Local<v8::FunctionTemplate> tpl = Nan::New<v8::FunctionTemplate>(New);

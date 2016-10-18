@@ -28,6 +28,5 @@ NAN_METHOD(ReadResumeData::DoReadResumeData)
         return;
     }
 
-    v8::Local<v8::External> ext = v8::External::New(info.GetIsolate(), static_cast<void*>(&params));
-    info.GetReturnValue().Set(AddTorrentParams::NewInstance(ext));
+    info.GetReturnValue().Set(AddTorrentParams::ToObject(params));
 }
