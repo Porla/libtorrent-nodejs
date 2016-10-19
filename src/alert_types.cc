@@ -223,6 +223,60 @@ v8::Local<v8::Object> AlertTypes::ToObject(libtorrent::alert* alert)
     case libtorrent::session_stats_alert::alert_type:
         ToSessionStatsAlert(obj, static_cast<libtorrent::session_stats_alert*>(alert));
         break;
+    case libtorrent::dht_error_alert::alert_type:
+        ToDhtErrorAlert(obj, static_cast<libtorrent::dht_error_alert*>(alert));
+        break;
+    case libtorrent::dht_immutable_item_alert::alert_type:
+        ToDhtImmutableItemAlert(obj, static_cast<libtorrent::dht_immutable_item_alert*>(alert));
+        break;
+    case libtorrent::dht_mutable_item_alert::alert_type:
+        ToDhtMutableItemAlert(obj, static_cast<libtorrent::dht_mutable_item_alert*>(alert));
+        break;
+    case libtorrent::dht_put_alert::alert_type:
+        ToDhtPutAlert(obj, static_cast<libtorrent::dht_put_alert*>(alert));
+        break;
+    case libtorrent::i2p_alert::alert_type:
+        ToI2pAlert(obj, static_cast<libtorrent::i2p_alert*>(alert));
+        break;
+    case libtorrent::dht_outgoing_get_peers_alert::alert_type:
+        ToDhtOutgoingGetPeersAlert(obj, static_cast<libtorrent::dht_outgoing_get_peers_alert*>(alert));
+        break;
+    case libtorrent::log_alert::alert_type:
+        ToLogAlert(obj, static_cast<libtorrent::log_alert*>(alert));
+        break;
+    case libtorrent::torrent_log_alert::alert_type:
+        ToTorrentLogAlert(obj, static_cast<libtorrent::torrent_log_alert*>(alert));
+        break;
+    case libtorrent::peer_log_alert::alert_type:
+        ToPeerLogAlert(obj, static_cast<libtorrent::peer_log_alert*>(alert));
+        break;
+    case libtorrent::lsd_error_alert::alert_type:
+        ToLsdErrorAlert(obj, static_cast<libtorrent::lsd_error_alert*>(alert));
+        break;
+    case libtorrent::dht_stats_alert::alert_type:
+        ToDhtStatsAlert(obj, static_cast<libtorrent::dht_stats_alert*>(alert));
+        break;
+    case libtorrent::incoming_request_alert::alert_type:
+        ToIncomingRequestAlert(obj, static_cast<libtorrent::incoming_request_alert*>(alert));
+        break;
+    case libtorrent::dht_log_alert::alert_type:
+        ToDhtLogAlert(obj, static_cast<libtorrent::dht_log_alert*>(alert));
+        break;
+    case libtorrent::dht_pkt_alert::alert_type:
+        ToDhtPktAlert(obj, static_cast<libtorrent::dht_pkt_alert*>(alert));
+        break;
+    case libtorrent::dht_get_peers_reply_alert::alert_type:
+        ToDhtGetPeersReplyAlert(obj, static_cast<libtorrent::dht_get_peers_reply_alert*>(alert));
+        break;
+    case libtorrent::dht_direct_response_alert::alert_type:
+        ToDhtDirectResponseAlert(obj, static_cast<libtorrent::dht_direct_response_alert*>(alert));
+        break;
+    case libtorrent::picker_log_alert::alert_type:
+        ToPickerLogAlert(obj, static_cast<libtorrent::picker_log_alert*>(alert));
+        break;
+    case libtorrent::session_error_alert::alert_type:
+        ToSessionErrorAlert(obj, static_cast<libtorrent::session_error_alert*>(alert));
+        break;
     }
 
     return scope.Escape(obj);
@@ -875,4 +929,185 @@ void AlertTypes::ToMmapCacheAlert(v8::Local<v8::Object> obj, libtorrent::mmap_ca
 void AlertTypes::ToSessionStatsAlert(v8::Local<v8::Object> obj, libtorrent::session_stats_alert* alert)
 {
     // TODO
+}
+
+void AlertTypes::ToDhtErrorAlert(v8::Local<v8::Object> obj, libtorrent::dht_error_alert* alert)
+{
+    if (alert->error)
+    {
+        v8::Local<v8::Object> err = Nan::New<v8::Object>();
+        err->Set(Nan::New("message").ToLocalChecked(), Nan::New(alert->error.message()).ToLocalChecked());
+        err->Set(Nan::New("value").ToLocalChecked(), Nan::New(alert->error.value()));
+        obj->Set(Nan::New("error").ToLocalChecked(), err);
+    }
+
+    obj->Set(Nan::New("operation").ToLocalChecked(), Nan::New(alert->operation));
+}
+
+void AlertTypes::ToDhtImmutableItemAlert(v8::Local<v8::Object> obj, libtorrent::dht_immutable_item_alert* alert)
+{
+    std::stringstream ss;
+    ss << alert->target;
+
+    obj->Set(Nan::New("target").ToLocalChecked(), Nan::New(ss.str()).ToLocalChecked());
+    // TODO item
+}
+
+void AlertTypes::ToDhtMutableItemAlert(v8::Local<v8::Object> obj, libtorrent::dht_mutable_item_alert* alert)
+{
+    // TODO
+}
+
+void AlertTypes::ToDhtPutAlert(v8::Local<v8::Object> obj, libtorrent::dht_put_alert* alert)
+{
+    // TODO
+}
+
+void AlertTypes::ToI2pAlert(v8::Local<v8::Object> obj, libtorrent::i2p_alert* alert)
+{
+    if (alert->error)
+    {
+        v8::Local<v8::Object> err = Nan::New<v8::Object>();
+        err->Set(Nan::New("message").ToLocalChecked(), Nan::New(alert->error.message()).ToLocalChecked());
+        err->Set(Nan::New("value").ToLocalChecked(), Nan::New(alert->error.value()));
+        obj->Set(Nan::New("error").ToLocalChecked(), err);
+    }
+}
+
+void AlertTypes::ToDhtOutgoingGetPeersAlert(v8::Local<v8::Object> obj, libtorrent::dht_outgoing_get_peers_alert* alert)
+{
+    std::stringstream info_hash;
+    info_hash << alert->info_hash;
+
+    std::stringstream obfuscated_info_hash;
+    obfuscated_info_hash << alert->obfuscated_info_hash;
+
+    // TODO ip
+
+    obj->Set(Nan::New("info_hash").ToLocalChecked(), Nan::New(info_hash.str()).ToLocalChecked());
+    obj->Set(Nan::New("obfuscated_info_hash").ToLocalChecked(), Nan::New(obfuscated_info_hash.str()).ToLocalChecked());
+}
+
+void AlertTypes::ToLogAlert(v8::Local<v8::Object> obj, libtorrent::log_alert* alert)
+{
+    obj->Set(Nan::New("msg").ToLocalChecked(), Nan::New(alert->msg()).ToLocalChecked());
+}
+
+void AlertTypes::ToTorrentLogAlert(v8::Local<v8::Object> obj, libtorrent::torrent_log_alert* alert)
+{
+    ToTorrentAlert(obj, alert);
+    obj->Set(Nan::New("msg").ToLocalChecked(), Nan::New(alert->msg()).ToLocalChecked());
+}
+
+void AlertTypes::ToPeerLogAlert(v8::Local<v8::Object> obj, libtorrent::peer_log_alert* alert)
+{
+    ToPeerAlert(obj, alert);
+    obj->Set(Nan::New("direction").ToLocalChecked(), Nan::New(alert->direction));
+    obj->Set(Nan::New("event_type").ToLocalChecked(), Nan::New(alert->event_type).ToLocalChecked());
+    obj->Set(Nan::New("msg").ToLocalChecked(), Nan::New(alert->msg()).ToLocalChecked());
+}
+
+void AlertTypes::ToLsdErrorAlert(v8::Local<v8::Object> obj, libtorrent::lsd_error_alert* alert)
+{
+    if (alert->error)
+    {
+        v8::Local<v8::Object> err = Nan::New<v8::Object>();
+        err->Set(Nan::New("message").ToLocalChecked(), Nan::New(alert->error.message()).ToLocalChecked());
+        err->Set(Nan::New("value").ToLocalChecked(), Nan::New(alert->error.value()));
+        obj->Set(Nan::New("error").ToLocalChecked(), err);
+    }
+}
+
+void AlertTypes::ToDhtStatsAlert(v8::Local<v8::Object> obj, libtorrent::dht_stats_alert* alert)
+{
+    v8::Local<v8::Array> active_requests = Nan::New<v8::Array>(static_cast<uint32_t>(alert->active_requests.size()));
+
+    for (uint32_t i = 0; i < active_requests->Length(); i++)
+    {
+        libtorrent::dht_lookup& ar = alert->active_requests.at(i);
+
+        v8::Local<v8::Object> req = Nan::New<v8::Object>();
+        req->Set(Nan::New("type").ToLocalChecked(), Nan::New(ar.type).ToLocalChecked());
+        req->Set(Nan::New("outstanding_requests").ToLocalChecked(), Nan::New(ar.outstanding_requests));
+        req->Set(Nan::New("timeouts").ToLocalChecked(), Nan::New(ar.timeouts));
+        req->Set(Nan::New("responses").ToLocalChecked(), Nan::New(ar.responses));
+        req->Set(Nan::New("branch_factor").ToLocalChecked(), Nan::New(ar.branch_factor));
+        req->Set(Nan::New("nodes_left").ToLocalChecked(), Nan::New(ar.nodes_left));
+        req->Set(Nan::New("last_sent").ToLocalChecked(), Nan::New(ar.last_sent));
+        req->Set(Nan::New("first_timeout").ToLocalChecked(), Nan::New(ar.first_timeout));
+
+        std::stringstream ss;
+        ss << ar.target;
+        req->Set(Nan::New("target").ToLocalChecked(), Nan::New(ss.str()).ToLocalChecked());
+
+        active_requests->Set(i, req);
+    }
+
+    v8::Local<v8::Array> routing_table = Nan::New<v8::Array>(static_cast<uint32_t>(alert->routing_table.size()));
+
+    for (uint32_t i = 0; i < routing_table->Length(); i++)
+    {
+        libtorrent::dht_routing_bucket& rb = alert->routing_table.at(i);
+
+        v8::Local<v8::Object> buck = Nan::New<v8::Object>();
+        buck->Set(Nan::New("num_nodes").ToLocalChecked(), Nan::New(rb.num_nodes));
+        buck->Set(Nan::New("num_replacements").ToLocalChecked(), Nan::New(rb.num_replacements));
+        buck->Set(Nan::New("last_active").ToLocalChecked(), Nan::New(rb.last_active));
+
+        routing_table->Set(i, buck);
+    }
+
+    obj->Set(Nan::New("active_requests").ToLocalChecked(), active_requests);
+    obj->Set(Nan::New("routing_table").ToLocalChecked(), routing_table);
+}
+
+void AlertTypes::ToIncomingRequestAlert(v8::Local<v8::Object> obj, libtorrent::incoming_request_alert* alert)
+{
+    ToPeerAlert(obj, alert);
+    // TODO: req
+}
+
+void AlertTypes::ToDhtLogAlert(v8::Local<v8::Object> obj, libtorrent::dht_log_alert* alert)
+{
+    obj->Set(Nan::New("log_message").ToLocalChecked(), Nan::New(alert->log_message()).ToLocalChecked());
+    obj->Set(Nan::New("module").ToLocalChecked(), Nan::New(alert->module));
+}
+
+void AlertTypes::ToDhtPktAlert(v8::Local<v8::Object> obj, libtorrent::dht_pkt_alert* alert)
+{
+    obj->Set(Nan::New("dir").ToLocalChecked(), Nan::New(alert->dir));
+    // TODO
+}
+
+void AlertTypes::ToDhtGetPeersReplyAlert(v8::Local<v8::Object> obj, libtorrent::dht_get_peers_reply_alert* alert)
+{
+    std::stringstream ss;
+    ss << alert->info_hash;
+
+    obj->Set(Nan::New("info_hash").ToLocalChecked(), Nan::New(ss.str()).ToLocalChecked());
+    obj->Set(Nan::New("num_peers").ToLocalChecked(), Nan::New(alert->num_peers()));
+    // TODO: peers
+}
+
+void AlertTypes::ToDhtDirectResponseAlert(v8::Local<v8::Object> obj, libtorrent::dht_direct_response_alert* alert)
+{
+    // TODO
+}
+
+void AlertTypes::ToPickerLogAlert(v8::Local<v8::Object> obj, libtorrent::picker_log_alert* alert)
+{
+    ToPeerAlert(obj, alert);
+    obj->Set(Nan::New("picker_flags").ToLocalChecked(), Nan::New(alert->picker_flags));
+    // TODO: blocks
+}
+
+void AlertTypes::ToSessionErrorAlert(v8::Local<v8::Object> obj, libtorrent::session_error_alert* alert)
+{
+    if (alert->error)
+    {
+        v8::Local<v8::Object> err = Nan::New<v8::Object>();
+        err->Set(Nan::New("message").ToLocalChecked(), Nan::New(alert->error.message()).ToLocalChecked());
+        err->Set(Nan::New("value").ToLocalChecked(), Nan::New(alert->error.value()));
+        obj->Set(Nan::New("error").ToLocalChecked(), err);
+    }
 }

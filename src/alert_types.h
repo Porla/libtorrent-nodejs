@@ -76,6 +76,24 @@ namespace libtorrent
     struct state_update_alert;
     struct mmap_cache_alert;
     struct session_stats_alert;
+    struct dht_error_alert;
+    struct dht_immutable_item_alert;
+    struct dht_mutable_item_alert;
+    struct dht_put_alert;
+    struct i2p_alert;
+    struct dht_outgoing_get_peers_alert;
+    struct log_alert;
+    struct torrent_log_alert;
+    struct peer_log_alert;
+    struct lsd_error_alert;
+    struct dht_stats_alert;
+    struct incoming_request_alert;
+    struct dht_log_alert;
+    struct dht_pkt_alert;
+    struct dht_get_peers_reply_alert;
+    struct dht_direct_response_alert;
+    struct picker_log_alert;
+    struct session_error_alert;
 }
 
 namespace lt
@@ -156,6 +174,24 @@ namespace lt
         static void ToStateUpdateAlert(v8::Local<v8::Object> obj, libtorrent::state_update_alert* alert);
         static void ToMmapCacheAlert(v8::Local<v8::Object> obj, libtorrent::mmap_cache_alert* alert);
         static void ToSessionStatsAlert(v8::Local<v8::Object> obj, libtorrent::session_stats_alert* alert);
+        static void ToDhtErrorAlert(v8::Local<v8::Object> obj, libtorrent::dht_error_alert* alert);
+        static void ToDhtImmutableItemAlert(v8::Local<v8::Object> obj, libtorrent::dht_immutable_item_alert* alert);
+        static void ToDhtMutableItemAlert(v8::Local<v8::Object> obj, libtorrent::dht_mutable_item_alert* alert);
+        static void ToDhtPutAlert(v8::Local<v8::Object> obj, libtorrent::dht_put_alert* alert);
+        static void ToI2pAlert(v8::Local<v8::Object> obj, libtorrent::i2p_alert* alert);
+        static void ToDhtOutgoingGetPeersAlert(v8::Local<v8::Object> obj, libtorrent::dht_outgoing_get_peers_alert* alert);
+        static void ToLogAlert(v8::Local<v8::Object> obj, libtorrent::log_alert* alert);
+        static void ToTorrentLogAlert(v8::Local<v8::Object> obj, libtorrent::torrent_log_alert* alert);
+        static void ToPeerLogAlert(v8::Local<v8::Object> obj, libtorrent::peer_log_alert* alert);
+        static void ToLsdErrorAlert(v8::Local<v8::Object> obj, libtorrent::lsd_error_alert* alert);
+        static void ToDhtStatsAlert(v8::Local<v8::Object> obj, libtorrent::dht_stats_alert* alert);
+        static void ToIncomingRequestAlert(v8::Local<v8::Object> obj, libtorrent::incoming_request_alert* alert);
+        static void ToDhtLogAlert(v8::Local<v8::Object> obj, libtorrent::dht_log_alert* alert);
+        static void ToDhtPktAlert(v8::Local<v8::Object> obj, libtorrent::dht_pkt_alert* alert);
+        static void ToDhtGetPeersReplyAlert(v8::Local<v8::Object> obj, libtorrent::dht_get_peers_reply_alert* alert);
+        static void ToDhtDirectResponseAlert(v8::Local<v8::Object> obj, libtorrent::dht_direct_response_alert* alert);
+        static void ToPickerLogAlert(v8::Local<v8::Object> obj, libtorrent::picker_log_alert* alert);
+        static void ToSessionErrorAlert(v8::Local<v8::Object> obj, libtorrent::session_error_alert* alert);
     };
 }
 
