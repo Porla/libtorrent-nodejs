@@ -72,5 +72,5 @@ NAN_METHOD(TorrentHandle::GetStatus)
     TorrentHandle* obj = Nan::ObjectWrap::Unwrap<TorrentHandle>(info.This());
     libtorrent::torrent_status st = obj->th_->status();
 
-    info.GetReturnValue().Set(TorrentStatus::CreateObject(info.GetIsolate(), st));
+    info.GetReturnValue().Set(TorrentStatus::CreateObject(st));
 }
