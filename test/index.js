@@ -51,6 +51,22 @@ describe('libtorrent', function() {
         });
     });
 
+    describe("file_storage", function() {
+        var storage = null;
+
+        beforeEach(function() {
+            storage = new lt.torrent_info("res/debian-8.5.0-amd64-netinst.iso.torrent").files();
+        });
+
+        afterEach(function() {
+            storage = null;
+        });
+
+        it("is_valid()", function() {
+            assert(storage.is_valid());
+        });
+    });
+
     describe("read_resume_data", function() {
         it("can read resume data", function() {
             var params = lt.read_resume_data("d9:save_path3:foo11:file-format22:libtorrent resume file12:file-versioni1e9:info-hash20:aaaabbbbccccddddeeefe");

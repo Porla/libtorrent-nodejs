@@ -6,6 +6,7 @@
 #include <libtorrent/torrent_info.hpp>
 
 #include "bdecode.h"
+#include "file_storage.h"
 
 using lt::TorrentInfo;
 
@@ -142,12 +143,17 @@ v8::Local<v8::Object> TorrentInfo::NewInstance(v8::Local<v8::Value> arg)
 
 NAN_METHOD(TorrentInfo::Files)
 {
+    TorrentInfo* obj = Nan::ObjectWrap::Unwrap<TorrentInfo>(info.This());
 
+    std::reference_wrapper<const libtorrent::file_storage> fs = std::cref(obj->ti_->files());
+    v8::Local<v8::External> ext = Nan::New<v8::External>(static_cast<void*>(&fs));
+
+    info.GetReturnValue().Set(FileStorage::NewInstance(ext));
 }
 
 NAN_METHOD(TorrentInfo::OrigFiles)
 {
-
+    Nan::ThrowError("Not implemented");
 }
 
 NAN_METHOD(TorrentInfo::RenameFile)
