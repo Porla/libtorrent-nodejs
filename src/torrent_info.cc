@@ -28,8 +28,44 @@ NAN_MODULE_INIT(TorrentInfo::Init)
     tpl->SetClassName(Nan::New("torrent_info").ToLocalChecked());
     tpl->InstanceTemplate()->SetInternalFieldCount(1);
 
-    // Properties
-    Nan::SetNamedPropertyHandler(tpl->PrototypeTemplate(), PropertyGetter);
+    // Methods
+    Nan::SetPrototypeMethod(tpl, "files", Files);
+    Nan::SetPrototypeMethod(tpl, "orig_files", OrigFiles);
+    Nan::SetPrototypeMethod(tpl, "rename_file", RenameFile);
+    Nan::SetPrototypeMethod(tpl, "add_tracker", AddTracker);
+    Nan::SetPrototypeMethod(tpl, "trackers", Trackers);
+    Nan::SetPrototypeMethod(tpl, "similar_torrents", SimilarTorrents);
+    Nan::SetPrototypeMethod(tpl, "collections", Collections);
+    Nan::SetPrototypeMethod(tpl, "add_url_seed", AddUrlSeed);
+    Nan::SetPrototypeMethod(tpl, "add_http_seed", AddHttpSeed);
+    Nan::SetPrototypeMethod(tpl, "web_seeds", WebSeeds);
+    Nan::SetPrototypeMethod(tpl, "set_web_seeds", SetWebSeeds);
+    Nan::SetPrototypeMethod(tpl, "total_size", TotalSize);
+    Nan::SetPrototypeMethod(tpl, "piece_length", PieceLength);
+    Nan::SetPrototypeMethod(tpl, "num_pieces", NumPieces);
+    Nan::SetPrototypeMethod(tpl, "info_hash", InfoHash);
+    Nan::SetPrototypeMethod(tpl, "num_files", NumFiles);
+    Nan::SetPrototypeMethod(tpl, "map_block", MapBlock);
+    Nan::SetPrototypeMethod(tpl, "map_file", MapFile);
+    Nan::SetPrototypeMethod(tpl, "load", Load);
+    Nan::SetPrototypeMethod(tpl, "unload", Unload);
+    Nan::SetPrototypeMethod(tpl, "ssl_cert", SslCert);
+    Nan::SetPrototypeMethod(tpl, "is_valid", IsValid);
+    Nan::SetPrototypeMethod(tpl, "priv", Priv);
+    Nan::SetPrototypeMethod(tpl, "is_i2p", IsI2p);
+    Nan::SetPrototypeMethod(tpl, "piece_size", PieceSize);
+    Nan::SetPrototypeMethod(tpl, "hash_for_piece", HashForPiece);
+    Nan::SetPrototypeMethod(tpl, "is_loaded", IsLoaded);
+    Nan::SetPrototypeMethod(tpl, "merkle_tree", MerkleTree);
+    Nan::SetPrototypeMethod(tpl, "set_merkle_tree", SetMerkleTree);
+    Nan::SetPrototypeMethod(tpl, "name", Name);
+    Nan::SetPrototypeMethod(tpl, "creation_date", CreationDate);
+    Nan::SetPrototypeMethod(tpl, "creator", Creator);
+    Nan::SetPrototypeMethod(tpl, "comment", Comment);
+    Nan::SetPrototypeMethod(tpl, "nodes", Nodes);
+    Nan::SetPrototypeMethod(tpl, "add_node", AddNode);
+    Nan::SetPrototypeMethod(tpl, "parse_info_section", ParseInfoSection);
+    Nan::SetPrototypeMethod(tpl, "metadata", Metadata);
 
     constructor.Reset(Nan::GetFunction(tpl).ToLocalChecked());
     Nan::Set(target, Nan::New("torrent_info").ToLocalChecked(), Nan::GetFunction(tpl).ToLocalChecked());
@@ -101,16 +137,8 @@ v8::Local<v8::Object> TorrentInfo::NewInstance(v8::Local<v8::Value> arg)
     return scope.Escape(instance);
 }
 
-NAN_PROPERTY_GETTER(TorrentInfo::PropertyGetter)
+NAN_METHOD(TorrentInfo::Name)
 {
     TorrentInfo* obj = Nan::ObjectWrap::Unwrap<TorrentInfo>(info.This());
-
-    if (property->Equals(Nan::New("name").ToLocalChecked()))
-    {
-        info.GetReturnValue().Set(Nan::New(obj->ti_->name()).ToLocalChecked());
-    }
-}
-
-NAN_PROPERTY_SETTER(TorrentInfo::PropertySetter)
-{
+    info.GetReturnValue().Set(Nan::New(obj->ti_->name()).ToLocalChecked());
 }
