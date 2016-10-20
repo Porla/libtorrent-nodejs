@@ -154,18 +154,265 @@ describe('libtorrent', function() {
 
                 var node = lt.bdecode(data);
                 var ti = new lt.torrent_info(node);
-                assert.equal("debian-8.5.0-amd64-netinst.iso", ti.name);
+                assert.equal("debian-8.5.0-amd64-netinst.iso", ti.name());
                 done();
             });
         });
 
         it("can be constructed from a path", function() {
             var ti = new lt.torrent_info("res/debian-8.5.0-amd64-netinst.iso.torrent");
-            assert.equal("debian-8.5.0-amd64-netinst.iso", ti.name);
+            assert.equal("debian-8.5.0-amd64-netinst.iso", ti.name());
         });
 
         it("throws error when passed a non-existing path", function() {
             assert.throws(function() { new lt.torrent_info("non-existing path"); });
+        });
+    });
+
+    describe("torrent_handle", function() {
+        var session = null;
+        var handle = null;
+
+        beforeEach(function() {
+            session = new lt.session();
+            handle = session.add_torrent({
+                save_path: "./",
+                ti: new lt.torrent_info("res/debian-8.5.0-amd64-netinst.iso.torrent")
+            });
+        });
+
+        afterEach(function() {
+            session.remove_torrent(handle);
+            handle = null;
+            session = null;
+        });
+
+        it("get_peer_info()", function() {
+            var peers = handle.get_peer_info();
+            assert(peers.length >= 0);
+        });
+
+        it("status()", function() {
+            assert.equal("object", typeof handle.status());
+        })
+
+        it("set_piece_deadline(1, 1000, 0)", function() {
+            handle.set_piece_deadline(1, 1000, 0);
+        });
+
+        it("reset_piece_deadline(1)", function() {
+            handle.reset_piece_deadline(1);
+        });
+
+        it("clear_piece_deadlines()", function() {
+            handle.clear_piece_deadlines();
+        });
+
+        it("file_progress()", function() {
+            assert(handle.file_progress().length > 0);
+        });
+
+        it("clear_error()", function() {
+            handle.clear_error();
+        });
+
+        it("trackers()", function() {
+            assert(handle.trackers().length > 0);
+        });
+
+        it("replace_trackers([{}])", function() {
+            handle.replace_trackers([]);
+            assert.equal(0, handle.trackers().length);
+        });
+
+        it("add_tracker({})", function() {
+            var current = handle.trackers().length;
+            handle.add_tracker({ url: "http://foo.com" });
+            assert.equal(handle.trackers().length, current + 1);
+        });
+
+        it("add_url_seed()", function() {
+            handle.add_url_seed("http://foo.com");
+        });
+
+        it("remove_url_seed()", function() {
+            handle.remove_url_seed("http://foo.com");
+        });
+
+        it("url_seeds()", function() {
+            assert(handle.url_seeds().length >= 0);
+        });
+
+        it("add_http_seed()", function() {
+            handle.add_http_seed("http://foo.com");
+        });
+
+        it("remove_http_seed()", function() {
+            handle.remove_http_seed("http://foo.com");
+        });
+
+        it("http_seeds()", function() {
+            assert(handle.http_seeds().length >= 0);
+        });
+
+        it("is_valid()", function() {
+            assert.equal(true, handle.is_valid());
+        });
+
+        it("pause()", function() {
+            handle.pause();
+        });
+
+        it("resume()", function() {
+            handle.resume();
+        });
+
+        it("stop_when_ready()", function() {
+            handle.stop_when_ready(true);
+        });
+
+        it("set_upload_mode()", function() {
+            handle.set_upload_mode(true);
+        });
+
+        it("set_share_mode()", function() {
+            handle.set_share_mode(true);
+        });
+
+        it("flush_cache()", function() {
+            handle.flush_cache();
+        });
+
+        it("apply_ip_filter()", function() {
+            handle.apply_ip_filter(true);
+        });
+
+        it("force_recheck()", function() {
+            handle.force_recheck();
+        });
+
+        it("save_resume_data()", function() {
+            handle.save_resume_data();
+        });
+
+        it("need_save_resume_data()", function() {
+            assert.equal("boolean", typeof handle.need_save_resume_data());
+        });
+
+        it("auto_managed()", function() {
+            handle.auto_managed(true);
+        });
+
+        it("queue_position()", function() {
+            assert.equal("number", typeof handle.queue_position());
+        });
+
+        it("queue_position_up()", function() {
+            handle.queue_position_up();
+        });
+
+        it("queue_position_down()", function() {
+            handle.queue_position_down();
+        });
+
+        it("queue_position_top()", function() {
+            handle.queue_position_top();
+        });
+
+        it("queue_position_bottom()", function() {
+            handle.queue_position_bottom();
+        });
+
+        it("piece_availability()", function() {
+            assert(handle.piece_availability().length >= 0);
+        });
+
+        it("piece_priority(1)", function() {
+            assert.equal("number", typeof handle.piece_priority(1));
+        });
+
+        it("piece_priority(1, 1)", function() {
+            handle.piece_priority(1, 1);
+        });
+
+        it("prioritize_pieces([{}])", function() {
+            handle.prioritize_pieces([{ index: 1, priority: 2 }]);
+        });
+
+        it("prioritize_pieces([])", function() {
+            handle.prioritize_pieces([1,1,1]);
+        });
+
+        it("piece_priorities", function() {
+            assert(handle.piece_priorities().length >= 0);
+        });
+
+        it("file_priority(0)", function() {
+            assert.equal("number", typeof handle.file_priority(0));
+        });
+
+        it("file_priority(0, 1)", function() {
+            handle.file_priority(0, 1);
+        });
+
+        it("prioritize_files([])", function() {
+            handle.prioritize_files([1,1,1]);
+        });
+
+        it("file_priorities()", function() {
+            assert(handle.file_priorities().length >= 0);
+        });
+
+        it("force_reannounce(1,1)", function() {
+            handle.force_reannounce(1, 1);
+        });
+
+        it("force_dht_announce()", function() {
+            handle.force_dht_announce();
+        });
+
+        it("scrape_tracker(1)", function() {
+            handle.scrape_tracker(1);
+        });
+
+        it("set_upload_limit(1)", function() {
+            handle.set_upload_limit(1);
+        });
+
+        it("upload_limit()", function() {
+            assert.equal("number", typeof handle.upload_limit());
+        });
+
+        it("set_download_limit(1)", function() {
+            handle.set_download_limit(1);
+        });
+
+        it("download_limit()", function() {
+            assert.equal("number", typeof handle.download_limit());
+        });
+
+        it("set_sequential_download()", function() {
+            handle.set_sequential_download(true);
+        });
+
+        it("connect_peer()", function() {
+            handle.connect_peer([ "127.0.0.1", 6881 ]);
+        });
+
+        it("set_max_uploads()", function() {
+            handle.set_max_uploads(100);
+        });
+
+        it("max_uploads()", function() {
+            assert.equal("number", typeof handle.max_uploads());
+        });
+
+        it("set_max_connections()", function() {
+            handle.set_max_connections(100);
+        });
+
+        it("max_connections()", function() {
+            assert.equal("number", typeof handle.max_connections());
         });
     });
 });
