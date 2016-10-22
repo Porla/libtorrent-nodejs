@@ -11,9 +11,15 @@ libtorrent::add_torrent_params AddTorrentParams::FromObject(v8::Local<v8::Object
 {
     libtorrent::add_torrent_params params;
 
+    auto flags = Nan::New("flags").ToLocalChecked();
     auto active_time = Nan::New("active_time").ToLocalChecked();
     auto save_path = Nan::New("save_path").ToLocalChecked();
     auto ti = Nan::New("ti").ToLocalChecked();
+
+    if (object->Has(flags) && object->Get(flags)->IsInt32())
+    {
+        params.flags = static_cast<libtorrent::add_torrent_params::flags_t>(object->Get(flags)->Int32Value());
+    }
 
     if (object->Has(active_time) && object->Get(active_time)->IsNumber())
     {

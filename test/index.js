@@ -65,6 +65,8 @@ describe('libtorrent', function() {
         it("is_valid()", function() {
             assert(storage.is_valid());
         });
+
+        it("num_files()", () => assert(storage.num_files() > 0));
     });
 
     describe("read_resume_data", function() {
@@ -93,6 +95,7 @@ describe('libtorrent', function() {
         it("can add torrent", function() {
             var obj = new lt.session();
             var handle = obj.add_torrent({
+                flags: 0x020,
                 save_path: "./",
                 ti: new lt.torrent_info("res/debian-8.5.0-amd64-netinst.iso.torrent")
             });
@@ -113,6 +116,7 @@ describe('libtorrent', function() {
         it("can remove torrent", function() {
             var obj = new lt.session();
             var handle = obj.add_torrent({
+                flags: 0x020,
                 save_path: "./",
                 ti: new lt.torrent_info("res/debian-8.5.0-amd64-netinst.iso.torrent")
             });
@@ -192,6 +196,7 @@ describe('libtorrent', function() {
         beforeEach(function() {
             session = new lt.session();
             handle = session.add_torrent({
+                flags: 0x020,
                 save_path: "./",
                 ti: new lt.torrent_info("res/debian-8.5.0-amd64-netinst.iso.torrent")
             });
