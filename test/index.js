@@ -9,6 +9,8 @@ function assertProperty(object, propertyName, testValue) {
 }
 
 describe('libtorrent', function() {
+    this.timeout(10000);
+
     describe("bdecode", function() {
         it("can bdecode string", function() {
             var node = lt.bdecode("li2ei3ee");
