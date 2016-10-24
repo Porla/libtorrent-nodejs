@@ -32,6 +32,7 @@ namespace lt
         static NAN_METHOD(LoadState);
         static NAN_METHOD(New);
         static NAN_METHOD(PopAlerts);
+        static NAN_METHOD(PostTorrentUpdates);
         static NAN_METHOD(RemoveTorrent);
         static NAN_METHOD(WaitForAlert);
 
