@@ -11,10 +11,24 @@ libtorrent::add_torrent_params AddTorrentParams::FromObject(v8::Local<v8::Object
 {
     libtorrent::add_torrent_params params;
 
-    auto flags = Nan::New("flags").ToLocalChecked();
     auto active_time = Nan::New("active_time").ToLocalChecked();
+    auto file_priorities = Nan::New("file_priorities").ToLocalChecked();
+    auto flags = Nan::New("flags").ToLocalChecked();
+    auto info_hash = Nan::New("info_hash").ToLocalChecked();
+    auto max_connections = Nan::New("max_connections").ToLocalChecked();
+    auto max_uploads = Nan::New("max_uploads").ToLocalChecked();
     auto save_path = Nan::New("save_path").ToLocalChecked();
     auto ti = Nan::New("ti").ToLocalChecked();
+
+    if (object->Has(file_priorities) && object->Get(file_priorities)->IsArray())
+    {
+        v8::Local<v8::Array> arr = object->Get(file_priorities).As<v8::Array>();
+
+        for (uint32_t i = 0; i < arr->Length(); i++)
+        {
+            params.file_priorities.push_back(static_cast<uint8_t>(arr->Get(i)->Int32Value()));
+        }
+    }
 
     if (object->Has(flags) && object->Get(flags)->IsInt32())
     {
@@ -24,6 +38,22 @@ libtorrent::add_torrent_params AddTorrentParams::FromObject(v8::Local<v8::Object
     if (object->Has(active_time) && object->Get(active_time)->IsNumber())
     {
         params.active_time = object->Get(active_time)->ToNumber()->Int32Value();
+    }
+
+    if (object->Has(info_hash) && object->Get(info_hash)->IsString())
+    {
+        std::string ih = *Nan::Utf8String(object->Get(info_hash));
+        params.info_hash = libtorrent::sha1_hash(ih);
+    }
+
+    if (object->Has(max_connections) && object->Get(max_connections)->IsInt32())
+    {
+        params.max_connections = object->Get(max_connections)->Int32Value();
+    }
+
+    if (object->Has(max_uploads) && object->Get(max_uploads)->IsInt32())
+    {
+        params.max_uploads = object->Get(max_uploads)->Int32Value();
     }
 
     if (object->Has(save_path) && object->Get(save_path)->IsString())
