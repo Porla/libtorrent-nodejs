@@ -69,6 +69,7 @@ NAN_MODULE_INIT(Session::Init)
     Nan::SetPrototypeMethod(tpl, "is_paused", IsPaused);
     Nan::SetPrototypeMethod(tpl, "load_state", LoadState);
     Nan::SetPrototypeMethod(tpl, "pop_alerts", PopAlerts);
+    Nan::SetPrototypeMethod(tpl, "post_torrent_updates", PostTorrentUpdates);
     Nan::SetPrototypeMethod(tpl, "remove_torrent", RemoveTorrent);
     Nan::SetPrototypeMethod(tpl, "wait_for_alert", WaitForAlert);
 
@@ -229,6 +230,12 @@ NAN_METHOD(Session::PopAlerts)
     }
 
     info.GetReturnValue().Set(arr);
+}
+
+NAN_METHOD(Session::PostTorrentUpdates)
+{
+    Session* obj = Nan::ObjectWrap::Unwrap<Session>(info.This());
+    obj->wrap_->post_torrent_updates();
 }
 
 NAN_METHOD(Session::RemoveTorrent)
