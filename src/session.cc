@@ -2,13 +2,16 @@
 
 #include <libtorrent/add_torrent_params.hpp>
 #include <libtorrent/session.hpp>
+#include <libtorrent/torrent_status.hpp>
 
 #include "add_torrent_params.h"
 #include "alert_types.h"
 #include "bdecode.h"
+#include "entry.h"
 #include "settings_pack.h"
 #include "torrent_handle.h"
 #include "torrent_info.h"
+#include "torrent_status.h"
 
 using lt::Session;
 
@@ -65,12 +68,15 @@ NAN_MODULE_INIT(Session::Init)
     Nan::SetPrototypeMethod(tpl, "apply_settings", ApplySettings);
     Nan::SetPrototypeMethod(tpl, "async_add_torrent", AsyncAddTorrent);
     Nan::SetPrototypeMethod(tpl, "get_settings", GetSettings);
+    Nan::SetPrototypeMethod(tpl, "get_torrent_status", GetTorrentStatus);
     Nan::SetPrototypeMethod(tpl, "is_listening", IsListening);
     Nan::SetPrototypeMethod(tpl, "is_paused", IsPaused);
     Nan::SetPrototypeMethod(tpl, "load_state", LoadState);
+    Nan::SetPrototypeMethod(tpl, "pause", Pause);
     Nan::SetPrototypeMethod(tpl, "pop_alerts", PopAlerts);
     Nan::SetPrototypeMethod(tpl, "post_torrent_updates", PostTorrentUpdates);
     Nan::SetPrototypeMethod(tpl, "remove_torrent", RemoveTorrent);
+    Nan::SetPrototypeMethod(tpl, "save_state", SaveState);
     Nan::SetPrototypeMethod(tpl, "wait_for_alert", WaitForAlert);
 
     constructor.Reset(Nan::GetFunction(tpl).ToLocalChecked());
@@ -194,6 +200,35 @@ NAN_METHOD(Session::GetSettings)
     info.GetReturnValue().Set(SettingsPack::NewInstance(ext));
 }
 
+NAN_METHOD(Session::GetTorrentStatus)
+{
+    Nan::ThrowError("Not fully working.");
+    return;
+
+    Session* obj = Nan::ObjectWrap::Unwrap<Session>(info.This());
+    v8::Local<v8::Function> func = info[0].As<v8::Function>();
+
+    std::vector<libtorrent::torrent_status> list;
+    obj->wrap_->get_torrent_status(&list, [func](const libtorrent::torrent_status& ts) {
+        const unsigned argc = 1;
+
+        v8::Local<v8::Object> status = TorrentStatus::CreateObject(ts);
+        v8::Local<v8::Value> argv[argc] = { status };
+        v8::Local<v8::Value> ret = Nan::MakeCallback(Nan::GetCurrentContext()->Global(), func, argc, argv);
+
+        return ret->BooleanValue();
+    });
+
+    v8::Local<v8::Array> arr = Nan::New<v8::Array>(static_cast<uint32_t>(list.size()));
+
+    for (uint32_t i = 0; i < arr->Length(); i++)
+    {
+        arr->Set(i, TorrentStatus::CreateObject(list.at(i)));
+    }
+
+    info.GetReturnValue().Set(arr);
+}
+
 NAN_METHOD(Session::IsListening)
 {
     Session* obj = Nan::ObjectWrap::Unwrap<Session>(info.This());
@@ -212,6 +247,12 @@ NAN_METHOD(Session::LoadState)
     BDecodeNode* node = Nan::ObjectWrap::Unwrap<BDecodeNode>(info[0]->ToObject());
 
     obj->wrap_->load_state(node->GetWrapped());
+}
+
+NAN_METHOD(Session::Pause)
+{
+    Session* obj = Nan::ObjectWrap::Unwrap<Session>(info.This());
+    obj->wrap_->pause();
 }
 
 NAN_METHOD(Session::PopAlerts)
@@ -261,11 +302,21 @@ NAN_METHOD(Session::RemoveTorrent)
     obj->wrap_->remove_torrent(th->GetWrapped(), options);
 }
 
+NAN_METHOD(Session::SaveState)
+{
+    Session* obj = Nan::ObjectWrap::Unwrap<Session>(info.This());
+    
+    libtorrent::entry e;
+    obj->wrap_->save_state(e);
+
+    info.GetReturnValue().Set(Entry::NewInstance(Nan::New<v8::External>(static_cast<void*>(&e))));
+}
+
 NAN_METHOD(Session::WaitForAlert)
 {
     Session* obj = Nan::ObjectWrap::Unwrap<Session>(info.This());
 
-    int timeout = Nan::To<int>(info[0]).FromJust();
+    int timeout = info[0]->Int32Value();
     Nan::Callback *callback = new Nan::Callback(info[1].As<v8::Function>());
 
     Nan::AsyncQueueWorker(new SessionWaitForAlertWorker(callback, obj->wrap_, timeout));

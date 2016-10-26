@@ -3,6 +3,7 @@
 #include <libtorrent/alert_types.hpp>
 
 #include "add_torrent_params.h"
+#include "entry.h"
 #include "torrent_handle.h"
 #include "torrent_status.h"
 
@@ -611,7 +612,8 @@ void AlertTypes::ToTorrentDeleteFailedAlert(v8::Local<v8::Object> obj, libtorren
 void AlertTypes::ToSaveResumeDataAlert(v8::Local<v8::Object> obj, libtorrent::save_resume_data_alert* alert)
 {
     ToTorrentAlert(obj, alert);
-    // TODO: resume data obj->Set(Nan::New("info_hash").ToLocalChecked(), Nan::New(ss.str()).ToLocalChecked());
+    v8::Local<v8::External> ext = Nan::New<v8::External>(static_cast<void*>(alert->resume_data.get()));
+    obj->Set(Nan::New("resume_data").ToLocalChecked(), Entry::NewInstance(ext));
 }
 
 void AlertTypes::ToSaveResumeDataFailedAlert(v8::Local<v8::Object> obj, libtorrent::save_resume_data_failed_alert* alert)
