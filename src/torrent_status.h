@@ -14,7 +14,7 @@ namespace lt
     class TorrentStatus
     {
     public:
-        static v8::Local<v8::Object> CreateObject(libtorrent::torrent_status& ts);
+        static v8::Local<v8::Object> CreateObject(libtorrent::torrent_status const& ts);
     };
 }
 

@@ -2,6 +2,9 @@ var fs = require('fs');
 var lt = require('../');
 var assert = require('assert');
 
+var SegfaultHandler = require('segfault-handler');
+SegfaultHandler.registerHandler();
+
 function assertProperty(object, propertyName, testValue) {
     assert(propertyName in object, 'object does not contain property "' + propertyName + '"');
     object[propertyName] = testValue;
@@ -52,6 +55,73 @@ describe('libtorrent', function() {
             assert.equal("bar", node.dict_find_string_value("foo"));
         });
     });
+
+    describe("bencode", function() {
+        it("can encode dict", function() {
+            assert.equal("de", lt.bencode(new lt.entry({})));
+        });
+
+        it("can encode integer", function() {
+            assert.equal("i2e", lt.bencode(new lt.entry(2)));
+        });
+
+        it("can encode list", function() {
+            assert.equal("le", lt.bencode(new lt.entry([])));
+        });
+
+        it("can encode string", function() {
+            assert.equal("3:foo", lt.bencode(new lt.entry("foo")));
+        });
+    });
+
+    describe("entry", function() {
+        it("dict()", function() {
+            var e = new lt.entry({foo:"bar",baz:12,boo:{foo:[1]}}).dict();
+            assert.equal("bar", e.foo.string());
+            assert.equal(12, e.baz.integer());
+            assert.equal('object', typeof e.boo.dict());
+        });
+
+        it("integer()", function() {
+            assert.equal(111, new lt.entry(111).integer());
+        });
+
+        it("list()", function() {
+            var e = new lt.entry(["foo", {foo: "bar"}]).list();
+            assert.equal(2, e.length);
+            assert.equal("foo", e[0].string());
+            assert.equal("bar", e[1].dict()["foo"].string());
+        });
+
+        it("string()", function() {
+            assert.equal("foo", new lt.entry("foo").string());
+        });
+
+        it("type(integer)", function() {
+            var e = new lt.entry(123);
+            assert.equal(0, e.type());
+        });
+
+        it("type(string)", function() {
+            var e = new lt.entry("foo");
+            assert.equal(1, e.type());
+        });
+
+        it("type(list)", function() {
+            var e = new lt.entry([1,2,3]);
+            assert.equal(2, e.type());
+        });
+
+        it("type(dictionary)", function() {
+            var e = new lt.entry({foo:"bar",baz:12,boo:{foo:[1]}});
+            assert.equal(3, e.type());
+        });
+
+        it("type(undefined)", function() {
+            var e = new lt.entry();
+            assert.equal(4, e.type());
+        });
+    })
 
     describe("file_storage", function() {
         var storage = null;
@@ -147,6 +217,12 @@ describe('libtorrent', function() {
             var obj = new lt.session();
             assert.equal(Array.isArray(obj.pop_alerts()), true);
         });
+
+        it("save_state()", function() {
+            var obj = new lt.session();
+            var e = obj.save_state();
+            assert.equal(3, e.type());
+        })
     });
 
     describe("settings_pack", function() {

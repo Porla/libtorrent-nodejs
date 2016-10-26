@@ -29,6 +29,8 @@
                 "src/add_torrent_params.cc",
                 "src/alert_types.cc",
                 "src/bdecode.cc",
+                "src/bencode.cc",
+                "src/entry.cc",
                 "src/file_storage.cc",
                 "src/read_resume_data.cc",
                 "src/session.cc",

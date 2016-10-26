@@ -9,7 +9,7 @@
 
 using lt::TorrentStatus;
 
-v8::Local<v8::Object> TorrentStatus::CreateObject(libtorrent::torrent_status& ts)
+v8::Local<v8::Object> TorrentStatus::CreateObject(libtorrent::torrent_status const& ts)
 {
     v8::Local<v8::Object> status = Nan::New<v8::Object>();
 
@@ -43,7 +43,10 @@ v8::Local<v8::Object> TorrentStatus::CreateObject(libtorrent::torrent_status& ts
     status->Set(Nan::New("down_bandwidth_queue").ToLocalChecked(), Nan::New(ts.down_bandwidth_queue));
     status->Set(Nan::New("error_file").ToLocalChecked(), Nan::New(ts.error_file));
     status->Set(Nan::New("finished_time").ToLocalChecked(), Nan::New(ts.finished_time));
-    status->Set(Nan::New("handle").ToLocalChecked(), TorrentHandle::NewInstance(Nan::New<v8::External>(static_cast<void*>(&ts.handle))));
+
+    libtorrent::torrent_handle th = ts.handle;
+    status->Set(Nan::New("handle").ToLocalChecked(), TorrentHandle::NewInstance(Nan::New<v8::External>(static_cast<void*>(&th))));
+    
     status->Set(Nan::New("has_incoming").ToLocalChecked(), Nan::New(ts.has_incoming));
     status->Set(Nan::New("has_metadata").ToLocalChecked(), Nan::New(ts.has_metadata));
 

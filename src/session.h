@@ -27,13 +27,16 @@ namespace lt
         static NAN_METHOD(ApplySettings);
         static NAN_METHOD(AsyncAddTorrent);
         static NAN_METHOD(GetSettings);
+        static NAN_METHOD(GetTorrentStatus);
         static NAN_METHOD(IsListening);
         static NAN_METHOD(IsPaused);
         static NAN_METHOD(LoadState);
         static NAN_METHOD(New);
+        static NAN_METHOD(Pause);
         static NAN_METHOD(PopAlerts);
         static NAN_METHOD(PostTorrentUpdates);
         static NAN_METHOD(RemoveTorrent);
+        static NAN_METHOD(SaveState);
         static NAN_METHOD(WaitForAlert);
 
         static Nan::Persistent<v8::Function> constructor;
