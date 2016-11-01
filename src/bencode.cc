@@ -13,10 +13,7 @@ NAN_METHOD(DoBEncode)
     std::vector<char> buf;
     libtorrent::bencode(std::back_inserter(buf), e->GetWrapped());
 
-    char* copy = static_cast<char*>(malloc(sizeof(char) * (buf.size() + 1)));
-    std::strncpy(copy, &buf[0], buf.size());
-
-    v8::Local<v8::Object> nodeBuffer = Nan::NewBuffer(copy, static_cast<uint32_t>(buf.size())).ToLocalChecked();
+    v8::Local<v8::Object> nodeBuffer = Nan::CopyBuffer(&buf[0], static_cast<uint32_t>(buf.size())).ToLocalChecked();
     info.GetReturnValue().Set(nodeBuffer);
 }
 
