@@ -2,6 +2,10 @@
 
 #include <libtorrent/settings_pack.hpp>
 
+#if defined(__APPLE__) && __cplusplus <= 201103
+    #include "_aux/std_make_unique.h"
+#endif
+
 #define PORLA_ENUM_SET_BOOL(obj, member) \
     obj->Set(Nan::New(#member).ToLocalChecked(), Nan::New(libtorrent::settings_pack::bool_types::member));
 

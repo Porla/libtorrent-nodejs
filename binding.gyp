@@ -55,7 +55,7 @@
             },
             "xcode_settings": {
                 "OTHER_CFLAGS": [
-                    "-std=c++14",
+                    "-std=c++11",
                     "-stdlib=libc++"
                 ]
             },
