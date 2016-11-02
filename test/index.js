@@ -432,6 +432,10 @@ describe('libtorrent', function() {
             handle.queue_position_bottom();
         });
 
+        it("torrent_file()", function() {
+            assert(handle.torrent_file().name().length > 0);
+        });
+
         it("piece_availability()", function() {
             assert(handle.piece_availability().length >= 0);
         });
