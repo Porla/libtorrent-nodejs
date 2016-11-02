@@ -8,10 +8,14 @@ using lt::FileStorage;
 
 Nan::Persistent<v8::Function> FileStorage::constructor;
 
-
 FileStorage::FileStorage(std::reference_wrapper<const libtorrent::file_storage> fs)
     : fs_(fs)
 {
+}
+
+libtorrent::file_storage const& FileStorage::GetWrapped()
+{
+    return fs_.get();
 }
 
 NAN_MODULE_INIT(FileStorage::Init)

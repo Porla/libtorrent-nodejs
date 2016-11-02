@@ -17,12 +17,17 @@ namespace lt
         static NAN_MODULE_INIT(Init);
         static v8::Local<v8::Object> NewInstance(v8::Local<v8::Value> arg);
 
+        libtorrent::file_storage const& GetWrapped();
+
     private:
         explicit FileStorage(std::reference_wrapper<const libtorrent::file_storage> fs);
 
         static NAN_METHOD(New);
 
         static NAN_METHOD(IsValid);
+        // TODO: Reserve
+        // TODO: AddFile
+        // TODO: RenameFile
         // TODO: MapBlock
         // TODO: MapFile
         static NAN_METHOD(NumFiles);
