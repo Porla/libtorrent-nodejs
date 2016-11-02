@@ -17,10 +17,24 @@ NAN_MODULE_INIT(ReadResumeData::Init)
 
 NAN_METHOD(ReadResumeData::DoReadResumeData)
 {
-    std::string buf = *Nan::Utf8String(info[0]->ToString());
+    std::string buf;
+
+    if (info[0]->IsString())
+    {
+        buf = *Nan::Utf8String(info[0]);
+    }
+    else
+    {
+        buf = std::string(
+            node::Buffer::Data(info[0]),
+            node::Buffer::Length(info[0]));
+    }
 
     libtorrent::error_code ec;
-    libtorrent::add_torrent_params params = libtorrent::read_resume_data(&buf[0], (int)buf.size(), ec);
+    libtorrent::add_torrent_params params = libtorrent::read_resume_data(
+        buf.c_str(),
+        static_cast<int>(buf.size()),
+        ec);
 
     if (ec)
     {
