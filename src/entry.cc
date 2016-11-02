@@ -40,6 +40,14 @@ libtorrent::entry Entry::FromJson(v8::Local<v8::Value> val)
         return libtorrent::entry(list);
     }
 
+    if (val->IsObject() && node::Buffer::HasInstance(val))
+    {
+        char* buf = node::Buffer::Data(val);
+        size_t len = node::Buffer::Length(val);
+
+        return libtorrent::entry::preformatted_type(buf, buf + len);
+    }
+
     if (val->IsObject() && !val->IsExternal())
     {
         v8::Local<v8::Object> obj = val.As<v8::Object>();
