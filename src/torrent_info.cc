@@ -3,9 +3,13 @@
 #include <sstream>
 
 #include <libtorrent/announce_entry.hpp>
+#include <libtorrent/bdecode.hpp>
+#include <libtorrent/bencode.hpp>
+#include <libtorrent/entry.hpp>
 #include <libtorrent/torrent_info.hpp>
 
 #include "bdecode.h"
+#include "entry.h"
 #include "file_storage.h"
 
 using lt::TorrentInfo;
@@ -88,10 +92,30 @@ NAN_METHOD(TorrentInfo::New)
         }
         else if (info.Length() > 0 && info[0]->IsObject())
         {
-            BDecodeNode* node = Nan::ObjectWrap::Unwrap<BDecodeNode>(info[0]->ToObject());
+            libtorrent::entry e = Entry::FromJson(info[0]);
 
+            std::vector<char> buf;
+            libtorrent::bencode(std::back_inserter(buf), e);
+
+            libtorrent::bdecode_node node;
             libtorrent::error_code ec;
-            obj = new TorrentInfo(std::make_shared<libtorrent::torrent_info>(node->GetWrapped(), ec));
+            libtorrent::bdecode(&buf[0], &buf[0] + buf.size(), node, ec);
+
+            if (ec)
+            {
+                Nan::ThrowError(ec.message().c_str());
+                return;
+            }
+
+            obj = new TorrentInfo(std::make_shared<libtorrent::torrent_info>(node, ec));
+
+            if (ec)
+            {
+                delete obj;
+
+                Nan::ThrowError(ec.message().c_str());
+                return;
+            }
         }
         else if (info.Length() > 0 && info[0]->IsString())
         {

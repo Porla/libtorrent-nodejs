@@ -1,6 +1,8 @@
 #include "Session.h"
 
 #include <libtorrent/add_torrent_params.hpp>
+#include <libtorrent/bdecode.hpp>
+#include <libtorrent/bencode.hpp>
 #include <libtorrent/session.hpp>
 #include <libtorrent/torrent_status.hpp>
 
@@ -244,9 +246,23 @@ NAN_METHOD(Session::IsPaused)
 NAN_METHOD(Session::LoadState)
 {
     Session* obj = Nan::ObjectWrap::Unwrap<Session>(info.This());
-    BDecodeNode* node = Nan::ObjectWrap::Unwrap<BDecodeNode>(info[0]->ToObject());
 
-    obj->wrap_->load_state(node->GetWrapped());
+    libtorrent::entry e = Entry::FromJson(info[0]);
+    
+    std::vector<char> buf;
+    libtorrent::bencode(std::back_inserter(buf), e);
+
+    libtorrent::bdecode_node node;
+    libtorrent::error_code ec;
+    libtorrent::bdecode(&buf[0], &buf[0] + buf.size(), node, ec);
+
+    if (ec)
+    {
+        Nan::ThrowError(ec.message().c_str());
+        return;
+    }
+
+    obj->wrap_->load_state(node);
 }
 
 NAN_METHOD(Session::Pause)
@@ -305,11 +321,11 @@ NAN_METHOD(Session::RemoveTorrent)
 NAN_METHOD(Session::SaveState)
 {
     Session* obj = Nan::ObjectWrap::Unwrap<Session>(info.This());
-    
+
     libtorrent::entry e;
     obj->wrap_->save_state(e);
 
-    info.GetReturnValue().Set(Entry::NewInstance(Nan::New<v8::External>(static_cast<void*>(&e))));
+    info.GetReturnValue().Set(Entry::ToJson(e));
 }
 
 NAN_METHOD(Session::WaitForAlert)

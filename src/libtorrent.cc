@@ -3,7 +3,6 @@
 #include "bdecode.h"
 #include "bencode.h"
 #include "create_torrent.h"
-#include "entry.h"
 #include "file_storage.h"
 #include "read_resume_data.h"
 #include "session.h"
@@ -14,10 +13,8 @@
 NAN_MODULE_INIT(InitAll)
 {
     lt::BDecode::Init(target);
-    lt::BDecodeNode::Init(target);
     lt::BEncode::Init(target);
     lt::CreateTorrent::Init(target);
-    lt::Entry::Init(target);
     lt::FileStorage::Init(target);
     lt::ReadResumeData::Init(target);
     lt::Session::Init(target);
