@@ -30,6 +30,7 @@
                 "src/alert_types.cc",
                 "src/bdecode.cc",
                 "src/bencode.cc",
+                "src/create_torrent.cc",
                 "src/entry.cc",
                 "src/file_storage.cc",
                 "src/read_resume_data.cc",

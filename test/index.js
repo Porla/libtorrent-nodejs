@@ -74,6 +74,16 @@ describe('libtorrent', function() {
         });
     });
 
+    describe("create_torrent", function() {
+        it("can be constructed from torrent_info", function() {
+            var ti = new lt.torrent_info("res/debian-8.5.0-amd64-netinst.iso.torrent");
+            var ct = new lt.create_torrent({ ti: ti });
+            var entry = ct.generate();
+
+            assert.equal(3, entry.type());
+        });
+    });
+
     describe("entry", function() {
         it("dict()", function() {
             var e = new lt.entry({foo:"bar",baz:12,boo:{foo:[1]}}).dict();
