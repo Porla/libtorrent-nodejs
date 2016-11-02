@@ -625,7 +625,9 @@ NAN_METHOD(TorrentHandle::TorrentFile)
 {
     TorrentHandle* obj = Nan::ObjectWrap::Unwrap<TorrentHandle>(info.This());
 
-    v8::Local<v8::External> ext = Nan::New<v8::External>(static_cast<void*>(&obj->th_->torrent_file()));
+    auto ti = obj->th_->torrent_file();
+    v8::Local<v8::External> ext = Nan::New<v8::External>(static_cast<void*>(&ti));
+
     info.GetReturnValue().Set(TorrentInfo::NewInstance(ext));
 }
 
