@@ -34,6 +34,14 @@ describe('libtorrent', function() {
         it("throws on invalid input", function() {
             assert.throws(function() { lt.bdecode("invalid input"); });
         });
+
+        it("decodes preformatted_t correctly", function() {
+            var ti = new lt.torrent_info("res/debian-8.5.0-amd64-netinst.iso.torrent");
+            var data = new lt.create_torrent({ ti: ti }).generate();
+            var ti2 = new lt.torrent_info(data);
+
+            assert.equal('debian-8.5.0-amd64-netinst.iso', ti2.name());
+        });
     });
 
     describe("bencode", function() {
