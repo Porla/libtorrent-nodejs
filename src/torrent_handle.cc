@@ -2,6 +2,7 @@
 
 #include <libtorrent/announce_entry.hpp>
 #include <libtorrent/peer_info.hpp>
+#include <libtorrent/torrent_info.hpp>
 #include <libtorrent/torrent_handle.hpp>
 #include <libtorrent/torrent_status.hpp>
 
@@ -622,7 +623,10 @@ NAN_METHOD(TorrentHandle::SetSslCertificateBuffer)
 
 NAN_METHOD(TorrentHandle::TorrentFile)
 {
-    Nan::ThrowError("Not implemented.");
+    TorrentHandle* obj = Nan::ObjectWrap::Unwrap<TorrentHandle>(info.This());
+
+    v8::Local<v8::External> ext = Nan::New<v8::External>(static_cast<void*>(&obj->th_->torrent_file()));
+    info.GetReturnValue().Set(TorrentInfo::NewInstance(ext));
 }
 
 NAN_METHOD(TorrentHandle::UseInterface)
