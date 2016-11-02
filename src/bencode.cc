@@ -8,10 +8,9 @@ using lt::BEncode;
 
 NAN_METHOD(DoBEncode)
 {
-    lt::Entry* e = Nan::ObjectWrap::Unwrap<lt::Entry>(info[0]->ToObject());
-
+    libtorrent::entry e = lt::Entry::FromJson(info[0]);
     std::vector<char> buf;
-    libtorrent::bencode(std::back_inserter(buf), e->GetWrapped());
+    libtorrent::bencode(std::back_inserter(buf), e);
 
     v8::Local<v8::Object> nodeBuffer = Nan::CopyBuffer(&buf[0], static_cast<uint32_t>(buf.size())).ToLocalChecked();
     info.GetReturnValue().Set(nodeBuffer);

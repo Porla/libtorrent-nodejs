@@ -612,8 +612,7 @@ void AlertTypes::ToTorrentDeleteFailedAlert(v8::Local<v8::Object> obj, libtorren
 void AlertTypes::ToSaveResumeDataAlert(v8::Local<v8::Object> obj, libtorrent::save_resume_data_alert* alert)
 {
     ToTorrentAlert(obj, alert);
-    v8::Local<v8::External> ext = Nan::New<v8::External>(static_cast<void*>(alert->resume_data.get()));
-    obj->Set(Nan::New("resume_data").ToLocalChecked(), Entry::NewInstance(ext));
+    obj->Set(Nan::New("resume_data").ToLocalChecked(), Entry::ToJson(*alert->resume_data.get()));
 }
 
 void AlertTypes::ToSaveResumeDataFailedAlert(v8::Local<v8::Object> obj, libtorrent::save_resume_data_failed_alert* alert)

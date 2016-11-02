@@ -36,7 +36,7 @@ NAN_METHOD(CreateTorrent::Generate)
     CreateTorrent* obj = Nan::ObjectWrap::Unwrap<CreateTorrent>(info.This());
     libtorrent::entry entry = obj->ct_->generate();
 
-    info.GetReturnValue().Set(Entry::NewInstance(Nan::New<v8::External>(static_cast<void*>(&entry))));
+    info.GetReturnValue().Set(Entry::ToJson(entry));
 }
 
 NAN_METHOD(CreateTorrent::New)

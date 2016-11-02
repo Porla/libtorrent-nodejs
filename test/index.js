@@ -16,16 +16,16 @@ describe('libtorrent', function() {
 
     describe("bdecode", function() {
         it("can bdecode string", function() {
-            var node = lt.bdecode("li2ei3ee");
-            assert.equal(node.type(), 2);
+            var list = lt.bdecode("li2ei3ee");
+            assert.equal(3, list[1]);
         });
 
         it("can bdecode buffer", function(done) {
             fs.readFile("res/debian-8.5.0-amd64-netinst.iso.torrent", (err, data) => {
                 if (err) { throw err; }
 
-                var node = lt.bdecode(data);
-                assert.equal(node.type(), 1);
+                var obj = lt.bdecode(data);
+                assert.equal('object', typeof obj);
 
                 done();
             });
@@ -36,41 +36,21 @@ describe('libtorrent', function() {
         });
     });
 
-    describe("bdecode_node", function() {
-        it("cannot be new'ed", function() {
-            assert.throws(function() { new lt.bdecode_node(); });
-        });
-
-        it("cannot be func'ed", function() {
-            assert.throws(function() { lt.bdecode_node(); });
-        });
-
-        it("has function dict_find_int_value", function() {
-            var node = lt.bdecode("d3:fooi42ee");
-            assert.equal(42, node.dict_find_int_value("foo"));
-        });
-
-        it("has function dict_find_string_value", function() {
-            var node = lt.bdecode("d3:foo3:bare");
-            assert.equal("bar", node.dict_find_string_value("foo"));
-        });
-    });
-
     describe("bencode", function() {
         it("can encode dict", function() {
-            assert.equal("de", lt.bencode(new lt.entry({})));
+            assert.equal("de", lt.bencode({}));
         });
 
         it("can encode integer", function() {
-            assert.equal("i2e", lt.bencode(new lt.entry(2)));
+            assert.equal("i2e", lt.bencode(2));
         });
 
         it("can encode list", function() {
-            assert.equal("le", lt.bencode(new lt.entry([])));
+            assert.equal("le", lt.bencode([]));
         });
 
         it("can encode string", function() {
-            assert.equal("3:foo", lt.bencode(new lt.entry("foo")));
+            assert.equal("3:foo", lt.bencode("foo"));
         });
     });
 
@@ -80,58 +60,9 @@ describe('libtorrent', function() {
             var ct = new lt.create_torrent({ ti: ti });
             var entry = ct.generate();
 
-            assert.equal(3, entry.type());
+            assert.equal(1465059745, entry['creation date']);
         });
     });
-
-    describe("entry", function() {
-        it("dict()", function() {
-            var e = new lt.entry({foo:"bar",baz:12,boo:{foo:[1]}}).dict();
-            assert.equal("bar", e.foo.string());
-            assert.equal(12, e.baz.integer());
-            assert.equal('object', typeof e.boo.dict());
-        });
-
-        it("integer()", function() {
-            assert.equal(111, new lt.entry(111).integer());
-        });
-
-        it("list()", function() {
-            var e = new lt.entry(["foo", {foo: "bar"}]).list();
-            assert.equal(2, e.length);
-            assert.equal("foo", e[0].string());
-            assert.equal("bar", e[1].dict()["foo"].string());
-        });
-
-        it("string()", function() {
-            assert.equal("foo", new lt.entry("foo").string());
-        });
-
-        it("type(integer)", function() {
-            var e = new lt.entry(123);
-            assert.equal(0, e.type());
-        });
-
-        it("type(string)", function() {
-            var e = new lt.entry("foo");
-            assert.equal(1, e.type());
-        });
-
-        it("type(list)", function() {
-            var e = new lt.entry([1,2,3]);
-            assert.equal(2, e.type());
-        });
-
-        it("type(dictionary)", function() {
-            var e = new lt.entry({foo:"bar",baz:12,boo:{foo:[1]}});
-            assert.equal(3, e.type());
-        });
-
-        it("type(undefined)", function() {
-            var e = new lt.entry();
-            assert.equal(4, e.type());
-        });
-    })
 
     describe("file_storage", function() {
         var storage = null;
@@ -231,7 +162,7 @@ describe('libtorrent', function() {
         it("save_state()", function() {
             var obj = new lt.session();
             var e = obj.save_state();
-            assert.equal(3, e.type());
+            assert.equal('object', typeof e);
         })
     });
 
@@ -256,12 +187,12 @@ describe('libtorrent', function() {
     });
 
     describe("torrent_info", function() {
-        it("can be constructed from a 'bdecode_node'", function(done) {
+        it("can be constructed from a bdecoded object", function(done) {
             fs.readFile("res/debian-8.5.0-amd64-netinst.iso.torrent", (err, data) => {
                 if (err) { throw err; }
 
-                var node = lt.bdecode(data);
-                var ti = new lt.torrent_info(node);
+                var obj = lt.bdecode(data);
+                var ti = new lt.torrent_info(obj);
                 assert.equal("debian-8.5.0-amd64-netinst.iso", ti.name());
                 done();
             });
