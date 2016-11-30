@@ -111,7 +111,6 @@ NAN_MODULE_INIT(SettingsPack::Init)
     PORLA_ENUM_SET_INT(int_types, active_dht_limit);
     PORLA_ENUM_SET_INT(int_types, active_downloads);
     PORLA_ENUM_SET_INT(int_types, active_limit);
-    PORLA_ENUM_SET_INT(int_types, active_loaded_limit);
     PORLA_ENUM_SET_INT(int_types, active_lsd_limit);
     PORLA_ENUM_SET_INT(int_types, active_seeds);
     PORLA_ENUM_SET_INT(int_types, active_tracker_limit);
@@ -234,7 +233,6 @@ NAN_MODULE_INIT(SettingsPack::Init)
     PORLA_ENUM_SET_STR(str_types, handshake_client_version);
     PORLA_ENUM_SET_STR(str_types, i2p_hostname);
     PORLA_ENUM_SET_STR(str_types, listen_interfaces);
-    PORLA_ENUM_SET_STR(str_types, mmap_cache);
     PORLA_ENUM_SET_STR(str_types, outgoing_interfaces);
     PORLA_ENUM_SET_STR(str_types, peer_fingerprint);
     PORLA_ENUM_SET_STR(str_types, proxy_hostname);

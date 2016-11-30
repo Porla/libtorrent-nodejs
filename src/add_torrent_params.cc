@@ -69,7 +69,7 @@ libtorrent::add_torrent_params AddTorrentParams::FromObject(v8::Local<v8::Object
     return params;
 }
 
-v8::Local<v8::Object> AddTorrentParams::ToObject(libtorrent::add_torrent_params& params)
+v8::Local<v8::Object> AddTorrentParams::ToObject(libtorrent::add_torrent_params const& params)
 {
     Nan::EscapableHandleScope scope;
     v8::Local<v8::Object> obj = Nan::New<v8::Object>();

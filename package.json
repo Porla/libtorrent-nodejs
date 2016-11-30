@@ -4,21 +4,28 @@
   "description": "Rasterbar-libtorrent bindings for Node.js",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Porla/libtorrent-nodejs"
+    "url": "git+https://github.com/porla/libtorrent-nodejs"
   },
   "license": "MIT",
   "scripts": {
-    "configure": "node-gyp configure",
-    "build": "node-gyp build",
-    "test": "mocha"
+    "prepublish": "npm ls",
+    "install": "node-pre-gyp install --fallback-to-build",
+    "test": "mocha --timeout 60000"
+  },
+  "binary": {
+    "module_name": "libtorrent",
+    "module_path": "./lib/binding/{node_abi}-{platform}-{arch}",
+    "host": "https://porla-binaries.s3.amazonaws.com",
+    "remote_path": "./{name}/v{version}/{toolset}",
+    "package_name": "{node_abi}-{platform}-{arch}.tar.gz"
   },
   "devDependencies": {
-    "mocha": "^2.2.5",
-    "nan": "^2.4.0",
-    "node-gyp": "^3.4.0",
-    "segfault-handler": "^1.0.0"
+    "aws-sdk": "^2.7.9",
+    "mocha": "^2.2.5"
   },
   "dependencies": {
-    "bindings": "^1.2.1"
-  }
+    "nan": "^2.4.0",
+    "node-pre-gyp": "^0.6.32"
+  },
+  "main": "./index.js"
 }

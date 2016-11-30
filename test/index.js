@@ -1,9 +1,6 @@
 var fs = require('fs');
-var lt = require('../');
+var lt = require('..');
 var assert = require('assert');
-
-var SegfaultHandler = require('segfault-handler');
-SegfaultHandler.registerHandler();
 
 function assertProperty(object, propertyName, testValue) {
     assert(propertyName in object, 'object does not contain property "' + propertyName + '"');
@@ -12,8 +9,6 @@ function assertProperty(object, propertyName, testValue) {
 }
 
 describe('libtorrent', function() {
-    this.timeout(10000);
-
     describe("bdecode", function() {
         it("can bdecode string", function() {
             var list = lt.bdecode("li2ei3ee");
@@ -21,7 +16,7 @@ describe('libtorrent', function() {
         });
 
         it("can bdecode buffer", function(done) {
-            fs.readFile("res/debian-8.5.0-amd64-netinst.iso.torrent", (err, data) => {
+            fs.readFile("res/debian-8.5.0-amd64-netinst.iso.torrent", function(err, data) {
                 if (err) { throw err; }
 
                 var obj = lt.bdecode(data);
@@ -87,7 +82,7 @@ describe('libtorrent', function() {
             assert(storage.is_valid());
         });
 
-        it("num_files()", () => assert(storage.num_files() > 0));
+        it("num_files()", function() { assert(storage.num_files() > 0); });
     });
 
     describe("read_resume_data", function() {
@@ -106,11 +101,6 @@ describe('libtorrent', function() {
             var sessionSettings = session.get_settings();
 
             assert.equal(true, sessionSettings.get_bool(lt.settings_pack.bool_types.anonymous_mode));
-        });
-
-        it("can add dht router", function() {
-            var obj = new lt.session();
-            obj.add_dht_router("router.bittorrent.com", 6881);
         });
 
         it("can add torrent", function() {
@@ -196,7 +186,7 @@ describe('libtorrent', function() {
 
     describe("torrent_info", function() {
         it("can be constructed from a bdecoded object", function(done) {
-            fs.readFile("res/debian-8.5.0-amd64-netinst.iso.torrent", (err, data) => {
+            fs.readFile("res/debian-8.5.0-amd64-netinst.iso.torrent", function (err, data) {
                 if (err) { throw err; }
 
                 var obj = lt.bdecode(data);

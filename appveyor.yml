@@ -1,0 +1,56 @@
+version: '{build}'
+
+environment:
+  node_pre_gyp_accessKeyId:
+    secure: ihq6EHL6/MSst5M56lF/eUaRoyTK9VJnw0GG208HY2I=
+  node_pre_gyp_secretAccessKey:
+    secure: W0MyCcCQZ+5+TcLDVfqDTZWxvUE3IqX6bJ1BFeWKqUHq2ZkYbNp3cYyU2jdcL4Zv
+
+  matrix:
+    - nodejs_version: 0.10
+      platform: x64
+    - nodejs_version: 0.10
+      platform: x86
+
+    - nodejs_version: 0.12
+      platform: x64
+    - nodejs_version: 0.12
+      platform: x86
+
+    - nodejs_version: 4
+      platform: x64
+    - nodejs_version: 4
+      platform: x86
+
+    - nodejs_version: 5
+      platform: x64
+    - nodejs_version: 5
+      platform: x86
+
+    - nodejs_version: 6
+      platform: x64
+    - nodejs_version: 6
+      platform: x86
+
+    - nodejs_version: 7
+      platform: x64
+    - nodejs_version: 7
+      platform: x86
+  
+matrix:
+  fast_finish: true
+
+os: Visual Studio 2015
+
+install:
+  - powershell -NoProfile -ExecutionPolicy unrestricted -Command .\scripts\install-libtorrent.ps1 -Platform %platform%
+
+cache:
+  - 'C:\Libraries\Rasterbar-libtorrent\msvc-14.0\%platform% -> libtorrent-commitish'
+
+build_script:
+  - powershell -NoProfile -ExecutionPolicy unrestricted -Command .\scripts\build-appveyor.ps1 -NodeVersion %nodejs_version% -Platform %platform%
+
+test: off
+
+deploy: off
