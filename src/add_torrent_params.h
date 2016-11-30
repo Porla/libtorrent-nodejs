@@ -15,7 +15,7 @@ namespace lt
     {
     public:
         static libtorrent::add_torrent_params FromObject(v8::Local<v8::Object> object);
-        static v8::Local<v8::Object> ToObject(libtorrent::add_torrent_params& params);
+        static v8::Local<v8::Object> ToObject(libtorrent::add_torrent_params const& params);
     };
 }
 

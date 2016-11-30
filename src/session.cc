@@ -65,7 +65,6 @@ NAN_MODULE_INIT(Session::Init)
     tpl->SetClassName(Nan::New("session").ToLocalChecked());
     tpl->InstanceTemplate()->SetInternalFieldCount(1);
 
-    Nan::SetPrototypeMethod(tpl, "add_dht_router", AddDhtRouter);
     Nan::SetPrototypeMethod(tpl, "add_torrent", AddTorrent);
     Nan::SetPrototypeMethod(tpl, "apply_settings", ApplySettings);
     Nan::SetPrototypeMethod(tpl, "async_add_torrent", AsyncAddTorrent);
@@ -133,16 +132,6 @@ NAN_METHOD(Session::New)
     }
 }
 
-NAN_METHOD(Session::AddDhtRouter)
-{
-    Session* obj = Nan::ObjectWrap::Unwrap<Session>(info.This());
-
-    std::string host = *Nan::Utf8String(info[0]->ToString());
-    int port = Nan::To<int>(info[1]).FromJust();
-
-    obj->wrap_->add_dht_router({ host, port });
-}
-
 NAN_METHOD(Session::AddTorrent)
 {
     if (!info[0]->IsObject())
@@ -165,7 +154,7 @@ NAN_METHOD(Session::AddTorrent)
         return;
     }
 
-    v8::Local<v8::External> ext = v8::External::New(info.GetIsolate(), static_cast<void*>(&th));
+    v8::Local<v8::External> ext = Nan::New<v8::External>(static_cast<void*>(&th));
     info.GetReturnValue().Set(TorrentHandle::NewInstance(ext));
 }
 
@@ -198,7 +187,7 @@ NAN_METHOD(Session::GetSettings)
     Session* obj = Nan::ObjectWrap::Unwrap<Session>(info.This());
     libtorrent::settings_pack sp = obj->wrap_->get_settings();
 
-    v8::Local<v8::External> ext = v8::External::New(info.GetIsolate(), static_cast<void*>(&sp));
+    v8::Local<v8::External> ext = Nan::New<v8::External>(static_cast<void*>(&sp));
     info.GetReturnValue().Set(SettingsPack::NewInstance(ext));
 }
 

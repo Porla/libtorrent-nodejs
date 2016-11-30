@@ -22,7 +22,6 @@ namespace lt
         explicit Session(libtorrent::settings_pack& settings);
         ~Session();
 
-        static NAN_METHOD(AddDhtRouter);
         static NAN_METHOD(AddTorrent);
         static NAN_METHOD(ApplySettings);
         static NAN_METHOD(AsyncAddTorrent);

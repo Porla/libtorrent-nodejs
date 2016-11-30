@@ -218,9 +218,6 @@ v8::Local<v8::Object> AlertTypes::ToObject(libtorrent::alert* alert)
     case libtorrent::state_update_alert::alert_type:
         ToStateUpdateAlert(obj, static_cast<libtorrent::state_update_alert*>(alert));
         break;
-    case libtorrent::mmap_cache_alert::alert_type:
-        ToMmapCacheAlert(obj, static_cast<libtorrent::mmap_cache_alert*>(alert));
-        break;
     case libtorrent::session_stats_alert::alert_type:
         ToSessionStatsAlert(obj, static_cast<libtorrent::session_stats_alert*>(alert));
         break;
@@ -322,11 +319,11 @@ void AlertTypes::ToReadPieceAlert(v8::Local<v8::Object> obj, libtorrent::read_pi
 {
     ToTorrentAlert(obj, alert);
 
-    if (alert->ec)
+    if (alert->error)
     {
         v8::Local<v8::Object> err = Nan::New<v8::Object>();
-        err->Set(Nan::New("message").ToLocalChecked(), Nan::New(alert->ec.message()).ToLocalChecked());
-        err->Set(Nan::New("value").ToLocalChecked(), Nan::New(alert->ec.value()));
+        err->Set(Nan::New("message").ToLocalChecked(), Nan::New(alert->error.message()).ToLocalChecked());
+        err->Set(Nan::New("value").ToLocalChecked(), Nan::New(alert->error.value()));
 
         obj->Set(Nan::New("ec").ToLocalChecked(), err);
     }
@@ -729,14 +726,14 @@ void AlertTypes::ToListenFailedAlert(v8::Local<v8::Object> obj, libtorrent::list
     obj->Set(Nan::New("listen_interface").ToLocalChecked(), Nan::New(alert->listen_interface()).ToLocalChecked());
     obj->Set(Nan::New("operation").ToLocalChecked(), Nan::New(alert->operation));
     obj->Set(Nan::New("port").ToLocalChecked(), Nan::New(alert->port));
-    obj->Set(Nan::New("sock_type").ToLocalChecked(), Nan::New(alert->sock_type));
+    obj->Set(Nan::New("socket_type").ToLocalChecked(), Nan::New(static_cast<int>(alert->socket_type)));
 }
 
 void AlertTypes::ToListenSucceededAlert(v8::Local<v8::Object> obj, libtorrent::listen_succeeded_alert* alert)
 {
     obj->Set(Nan::New("address").ToLocalChecked(), Nan::New(alert->address.to_string()).ToLocalChecked());
     obj->Set(Nan::New("port").ToLocalChecked(), Nan::New(alert->port));
-    obj->Set(Nan::New("sock_type").ToLocalChecked(), Nan::New(alert->sock_type));
+    obj->Set(Nan::New("socket_type").ToLocalChecked(), Nan::New(static_cast<int>(alert->socket_type)));
 }
 
 void AlertTypes::ToPortmapErrorAlert(v8::Local<v8::Object> obj, libtorrent::portmap_error_alert* alert)
@@ -881,10 +878,10 @@ void AlertTypes::ToTorrentNeedCertAlert(v8::Local<v8::Object> obj, libtorrent::t
 void AlertTypes::ToIncomingConnectionAlert(v8::Local<v8::Object> obj, libtorrent::incoming_connection_alert* alert)
 {
     v8::Local<v8::Array> endpoint = Nan::New<v8::Array>(2);
-    endpoint->Set(0, Nan::New(alert->ip.address().to_string()).ToLocalChecked());
-    endpoint->Set(1, Nan::New(alert->ip.port()));
+    endpoint->Set(0, Nan::New(alert->endpoint.address().to_string()).ToLocalChecked());
+    endpoint->Set(1, Nan::New(alert->endpoint.port()));
 
-    obj->Set(Nan::New("ip").ToLocalChecked(), endpoint);
+    obj->Set(Nan::New("endpoint").ToLocalChecked(), endpoint);
     obj->Set(Nan::New("socket_type").ToLocalChecked(), Nan::New(alert->socket_type));
 }
 
@@ -914,17 +911,6 @@ void AlertTypes::ToStateUpdateAlert(v8::Local<v8::Object> obj, libtorrent::state
     }
 
     obj->Set(Nan::New("status").ToLocalChecked(), status);
-}
-
-void AlertTypes::ToMmapCacheAlert(v8::Local<v8::Object> obj, libtorrent::mmap_cache_alert* alert)
-{
-    if (alert->error)
-    {
-        v8::Local<v8::Object> err = Nan::New<v8::Object>();
-        err->Set(Nan::New("message").ToLocalChecked(), Nan::New(alert->error.message()).ToLocalChecked());
-        err->Set(Nan::New("value").ToLocalChecked(), Nan::New(alert->error.value()));
-        obj->Set(Nan::New("error").ToLocalChecked(), err);
-    }
 }
 
 void AlertTypes::ToSessionStatsAlert(v8::Local<v8::Object> obj, libtorrent::session_stats_alert* alert)
@@ -991,13 +977,13 @@ void AlertTypes::ToDhtOutgoingGetPeersAlert(v8::Local<v8::Object> obj, libtorren
 
 void AlertTypes::ToLogAlert(v8::Local<v8::Object> obj, libtorrent::log_alert* alert)
 {
-    obj->Set(Nan::New("msg").ToLocalChecked(), Nan::New(alert->msg()).ToLocalChecked());
+    obj->Set(Nan::New("log_message").ToLocalChecked(), Nan::New(alert->log_message()).ToLocalChecked());
 }
 
 void AlertTypes::ToTorrentLogAlert(v8::Local<v8::Object> obj, libtorrent::torrent_log_alert* alert)
 {
     ToTorrentAlert(obj, alert);
-    obj->Set(Nan::New("msg").ToLocalChecked(), Nan::New(alert->msg()).ToLocalChecked());
+    obj->Set(Nan::New("log_message").ToLocalChecked(), Nan::New(alert->log_message()).ToLocalChecked());
 }
 
 void AlertTypes::ToPeerLogAlert(v8::Local<v8::Object> obj, libtorrent::peer_log_alert* alert)
@@ -1005,7 +991,7 @@ void AlertTypes::ToPeerLogAlert(v8::Local<v8::Object> obj, libtorrent::peer_log_
     ToPeerAlert(obj, alert);
     obj->Set(Nan::New("direction").ToLocalChecked(), Nan::New(alert->direction));
     obj->Set(Nan::New("event_type").ToLocalChecked(), Nan::New(alert->event_type).ToLocalChecked());
-    obj->Set(Nan::New("msg").ToLocalChecked(), Nan::New(alert->msg()).ToLocalChecked());
+    obj->Set(Nan::New("log_message").ToLocalChecked(), Nan::New(alert->log_message()).ToLocalChecked());
 }
 
 void AlertTypes::ToLsdErrorAlert(v8::Local<v8::Object> obj, libtorrent::lsd_error_alert* alert)
@@ -1025,7 +1011,7 @@ void AlertTypes::ToDhtStatsAlert(v8::Local<v8::Object> obj, libtorrent::dht_stat
 
     for (uint32_t i = 0; i < active_requests->Length(); i++)
     {
-        libtorrent::dht_lookup& ar = alert->active_requests.at(i);
+        libtorrent::dht_lookup const& ar = alert->active_requests.at(i);
 
         v8::Local<v8::Object> req = Nan::New<v8::Object>();
         req->Set(Nan::New("type").ToLocalChecked(), Nan::New(ar.type).ToLocalChecked());
@@ -1048,7 +1034,7 @@ void AlertTypes::ToDhtStatsAlert(v8::Local<v8::Object> obj, libtorrent::dht_stat
 
     for (uint32_t i = 0; i < routing_table->Length(); i++)
     {
-        libtorrent::dht_routing_bucket& rb = alert->routing_table.at(i);
+        libtorrent::dht_routing_bucket const& rb = alert->routing_table.at(i);
 
         v8::Local<v8::Object> buck = Nan::New<v8::Object>();
         buck->Set(Nan::New("num_nodes").ToLocalChecked(), Nan::New(rb.num_nodes));
@@ -1076,7 +1062,7 @@ void AlertTypes::ToDhtLogAlert(v8::Local<v8::Object> obj, libtorrent::dht_log_al
 
 void AlertTypes::ToDhtPktAlert(v8::Local<v8::Object> obj, libtorrent::dht_pkt_alert* alert)
 {
-    obj->Set(Nan::New("dir").ToLocalChecked(), Nan::New(alert->dir));
+    obj->Set(Nan::New("direction").ToLocalChecked(), Nan::New(alert->direction));
     // TODO
 }
 
