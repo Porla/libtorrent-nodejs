@@ -51,16 +51,17 @@
                 "TORRENT_NO_DEPRECATE",
                 "TORRENT_USE_OPENSSL"
             ],
+            "cflags": [ "-std=c++11" ],
+            "cflags_cc": [ "-std=c++11" ],
             "msvs_settings": {
                 "VCCLCompilerTool": {
                     "AdditionalOptions": [ "/EHsc", "/GR" ]
                 }
             },
             "xcode_settings": {
-                "OTHER_CFLAGS": [
-                    "-std=c++11",
-                    "-stdlib=libc++"
-                ]
+                "OTHER_CPLUSPLUSFLAGS": [ '-std=c++11', '-stdlib=libc++' ],
+                "OTHER_LDFLAGS": [ '-stdlib=libc++' ],
+                "MACOSX_DEPLOYMENT_TARGET": '10.9'
             },
             "conditions": [
                 [ 'OS=="win"', {
@@ -95,7 +96,14 @@
                 },
                   'OS=="mac"', {
                     "libraries": [
-                        "-ltorrent-rasterbar"
+                        "/usr/local/lib/libboost_system.a",
+                        "$(HOME)/libtorrent/lib/libtorrent-rasterbar.a"
+                    ]
+                },
+                  'OS=="linux"', {
+                    "libraries": [
+                        "$(HOME)/boost/lib/libboost_system.a",
+                        "$(HOME)/libtorrent/lib/libtorrent-rasterbar.a"
                     ]
                 }]
             ]
@@ -106,9 +114,19 @@
             "dependencies": [ "<(module_name)" ],
             "copies": [
                 {
-                    "files": [ "<(PRODUCT_DIR)/<(module_name).node", '<(openssl_root)/libeay32.dll','<(openssl_root)/ssleay32.dll' ],
+                    "files": [ "<(PRODUCT_DIR)/<(module_name).node" ],
                     "destination": "<(module_path)"
                 }
+            ],
+            "conditions": [
+                [ 'OS=="win"', {
+                    "copies": [
+                        {
+                            "files": [ '<(openssl_root)/libeay32.dll','<(openssl_root)/ssleay32.dll' ],
+                            "destination": "<(module_path)"
+                        }
+                    ]
+                }]
             ]
         }
     ]

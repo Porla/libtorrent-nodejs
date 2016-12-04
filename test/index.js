@@ -2,6 +2,9 @@ var fs = require('fs');
 var lt = require('..');
 var assert = require('assert');
 
+var SegfaultHandler = require('segfault-handler');
+SegfaultHandler.registerHandler("crash.log");
+
 function assertProperty(object, propertyName, testValue) {
     assert(propertyName in object, 'object does not contain property "' + propertyName + '"');
     object[propertyName] = testValue;

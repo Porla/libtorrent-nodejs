@@ -1,0 +1,55 @@
+language: cpp
+
+matrix:
+  fast_finish: true
+  include:
+    - env: NODE_VERSION=4
+      os: linux
+
+    - env: NODE_VERSION=5
+      os: linux
+
+    - env: NODE_VERSION=6
+      os: linux
+
+    - env: NODE_VERSION=7
+      os: linux
+
+    - env: NODE_VERSION=4
+      os: osx
+
+    - env: NODE_VERSION=5
+      os: osx
+
+    - env: NODE_VERSION=6
+      os: osx
+
+    - env: NODE_VERSION=7
+      os: osx
+
+addons:
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+    packages:
+    - g++-5
+
+cache:
+  directories:
+    - $HOME/boost
+    - $HOME/libtorrent
+
+install:
+  - export MACOSX_DEPLOYMENT_TARGET=10.9
+  - source scripts/install-node.sh $NODE_VERSION
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update && brew install openssl ; fi
+  - if [[ "$TRAVIS_OS_NAME" != "osx" ]]; then scripts/install-boost.sh            ; fi
+  - scripts/install-libtorrent.sh
+
+script:
+  - export CPATH=$CPATH:$HOME/boost/include
+  - export CPATH=$CPATH:$HOME/libtorrent/include
+  - export LIBRARY_PATH=$LIBRARY_PATH:$HOME/boost/lib
+  - export LIBRARY_PATH=$LIBRARY_PATH:$HOME/libtorrent/lib
+
+  - scripts/build-travis.sh
