@@ -23,4 +23,4 @@ NAN_MODULE_INIT(InitAll)
     lt::TorrentInfo::Init(target);
 }
 
-NODE_MODULE(libtorrent, InitAll)
+NODE_MODULE(porla_libtorrent, InitAll)

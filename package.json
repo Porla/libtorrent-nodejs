@@ -13,7 +13,7 @@
     "test": "mocha --timeout 60000"
   },
   "binary": {
-    "module_name": "libtorrent",
+    "module_name": "porla_libtorrent",
     "module_path": "./lib/binding/{node_abi}-{platform}-{arch}",
     "host": "https://porla-binaries.s3.amazonaws.com",
     "remote_path": "./{name}/v{version}/{toolset}",
@@ -21,7 +21,8 @@
   },
   "devDependencies": {
     "aws-sdk": "^2.7.9",
-    "mocha": "^2.2.5"
+    "mocha": "^2.2.5",
+    "segfault-handler": "^1.0.0"
   },
   "dependencies": {
     "nan": "^2.4.0",

@@ -2,7 +2,7 @@
 
 #include <libtorrent/settings_pack.hpp>
 
-#if defined(__APPLE__) && __cplusplus <= 201103
+#if !defined(WIN32) && __cplusplus <= 201103
     #include "_aux/std_make_unique.h"
 #endif
 
