@@ -56,7 +56,7 @@ if ($LASTEXITCODE -ne 0) {
     exit $LASTEXITCODE
 }
 
-if (Is-AppVeyor) {
+if (Is-AppVeyor -and Is-AppVeyorVersionTag) {
     $commit = $env:APPVEYOR_REPO_COMMIT_MESSAGE
 
     if ($commit -ne "" -and $commit -ne $null -and $commit.StartsWith(":shipit:")) {
