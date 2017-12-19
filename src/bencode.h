@@ -9,7 +9,7 @@ namespace libtorrent
     class entry;
 }
 
-namespace lt
+namespace plt
 {
     class BEncode
     {

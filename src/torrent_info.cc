@@ -12,7 +12,7 @@
 #include "entry.h"
 #include "file_storage.h"
 
-using lt::TorrentInfo;
+using plt::TorrentInfo;
 
 Nan::Persistent<v8::Function> TorrentInfo::constructor;
 
@@ -56,7 +56,6 @@ NAN_MODULE_INIT(TorrentInfo::Init)
     Nan::SetPrototypeMethod(tpl, "map_block", MapBlock);
     Nan::SetPrototypeMethod(tpl, "map_file", MapFile);
     Nan::SetPrototypeMethod(tpl, "load", Load);
-    Nan::SetPrototypeMethod(tpl, "unload", Unload);
     Nan::SetPrototypeMethod(tpl, "ssl_cert", SslCert);
     Nan::SetPrototypeMethod(tpl, "is_valid", IsValid);
     Nan::SetPrototypeMethod(tpl, "priv", Priv);
@@ -149,7 +148,7 @@ NAN_METHOD(TorrentInfo::New)
     else
     {
         v8::Local<v8::Function> cons = Nan::New(constructor);
-        info.GetReturnValue().Set(cons->NewInstance());
+        info.GetReturnValue().Set(Nan::NewInstance(cons).ToLocalChecked());
     }
 }
 
@@ -160,7 +159,7 @@ v8::Local<v8::Object> TorrentInfo::NewInstance(v8::Local<v8::Value> arg)
     const unsigned argc = 1;
     v8::Local<v8::Value> argv[argc] = { arg };
     v8::Local<v8::Function> cons = Nan::New<v8::Function>(constructor);
-    v8::Local<v8::Object> instance = cons->NewInstance(argc, argv);
+    v8::Local<v8::Object> instance = Nan::NewInstance(cons, argc, argv).ToLocalChecked();
 
     return scope.Escape(instance);
 }
@@ -183,7 +182,9 @@ NAN_METHOD(TorrentInfo::OrigFiles)
 NAN_METHOD(TorrentInfo::RenameFile)
 {
     TorrentInfo* obj = Nan::ObjectWrap::Unwrap<TorrentInfo>(info.This());
-    obj->ti_->rename_file(info[0]->Int32Value(), *Nan::Utf8String(info[0]));
+    obj->ti_->rename_file(
+        libtorrent::file_index_t(info[0]->Int32Value()),
+        *Nan::Utf8String(info[0]));
 }
 
 NAN_METHOD(TorrentInfo::AddTracker)
@@ -204,30 +205,13 @@ NAN_METHOD(TorrentInfo::Trackers)
         libtorrent::announce_entry& ae = trackers.at(i);
 
         v8::Local<v8::Object> t = Nan::New<v8::Object>();
-        t->Set(Nan::New("complete_sent").ToLocalChecked(), Nan::New(ae.complete_sent));
-        t->Set(Nan::New("fails").ToLocalChecked(), Nan::New(ae.fails));
         t->Set(Nan::New("fail_limit").ToLocalChecked(), Nan::New(ae.fail_limit));
 
-        if (ae.last_error)
-        {
-            v8::Local<v8::Object> err = Nan::New<v8::Object>();
-            err->Set(Nan::New("message").ToLocalChecked(), Nan::New(ae.last_error.message()).ToLocalChecked());
-            err->Set(Nan::New("value").ToLocalChecked(), Nan::New(ae.last_error.value()));
-            t->Set(Nan::New("last_error").ToLocalChecked(), err);
-        }
-
-        t->Set(Nan::New("message").ToLocalChecked(), Nan::New(ae.message).ToLocalChecked());
         // TODO: t->Set(Nan::New("min_announce").ToLocalChecked(), Nan::New(ae.min_announce).ToLocalChecked());
         // TODO: t->Set(Nan::New("next_announce").ToLocalChecked(), Nan::New(ae.next_announce).ToLocalChecked());
-        t->Set(Nan::New("scrape_complete").ToLocalChecked(), Nan::New(ae.scrape_complete));
-        t->Set(Nan::New("scrape_downloaded").ToLocalChecked(), Nan::New(ae.scrape_downloaded));
-        t->Set(Nan::New("scrape_incomplete").ToLocalChecked(), Nan::New(ae.scrape_incomplete));
         t->Set(Nan::New("source").ToLocalChecked(), Nan::New(ae.source));
-        t->Set(Nan::New("start_sent").ToLocalChecked(), Nan::New(ae.start_sent));
         t->Set(Nan::New("tier").ToLocalChecked(), Nan::New(ae.tier));
         t->Set(Nan::New("trackerid").ToLocalChecked(), Nan::New(ae.trackerid).ToLocalChecked());
-        t->Set(Nan::New("triggered_manually").ToLocalChecked(), Nan::New(ae.triggered_manually));
-        t->Set(Nan::New("updating").ToLocalChecked(), Nan::New(ae.updating));
         t->Set(Nan::New("url").ToLocalChecked(), Nan::New(ae.url).ToLocalChecked());
         t->Set(Nan::New("verified").ToLocalChecked(), Nan::New(ae.verified));
 
@@ -338,16 +322,10 @@ NAN_METHOD(TorrentInfo::Load)
     Nan::ThrowError("Not implemented");
 }
 
-NAN_METHOD(TorrentInfo::Unload)
-{
-    TorrentInfo* obj = Nan::ObjectWrap::Unwrap<TorrentInfo>(info.This());
-    obj->ti_->unload();
-}
-
 NAN_METHOD(TorrentInfo::SslCert)
 {
     TorrentInfo* obj = Nan::ObjectWrap::Unwrap<TorrentInfo>(info.This());
-    info.GetReturnValue().Set(Nan::New(obj->ti_->ssl_cert()).ToLocalChecked());
+    info.GetReturnValue().Set(Nan::New(obj->ti_->ssl_cert().to_string()).ToLocalChecked());
 }
 
 NAN_METHOD(TorrentInfo::IsValid)
@@ -371,14 +349,14 @@ NAN_METHOD(TorrentInfo::IsI2p)
 NAN_METHOD(TorrentInfo::PieceSize)
 {
     TorrentInfo* obj = Nan::ObjectWrap::Unwrap<TorrentInfo>(info.This());
-    info.GetReturnValue().Set(Nan::New(obj->ti_->piece_size(info[0]->Int32Value())));
+    info.GetReturnValue().Set(Nan::New(obj->ti_->piece_size(libtorrent::piece_index_t(info[0]->Int32Value()))));
 }
 
 NAN_METHOD(TorrentInfo::HashForPiece)
 {
     TorrentInfo* obj = Nan::ObjectWrap::Unwrap<TorrentInfo>(info.This());
     std::stringstream ss;
-    ss << obj->ti_->hash_for_piece(info[0]->Int32Value());
+    ss << obj->ti_->hash_for_piece(libtorrent::piece_index_t(info[0]->Int32Value()));
 
     info.GetReturnValue().Set(Nan::New(ss.str()).ToLocalChecked());
 }

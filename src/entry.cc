@@ -2,7 +2,7 @@
 
 #include <libtorrent/entry.hpp>
 
-using lt::Entry;
+using plt::Entry;
 
 libtorrent::entry Entry::FromJson(v8::Local<v8::Value> val)
 {

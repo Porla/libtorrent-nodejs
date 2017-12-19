@@ -5,7 +5,7 @@
 
 #include "torrent_info.h"
 
-using lt::AddTorrentParams;
+using plt::AddTorrentParams;
 
 libtorrent::add_torrent_params AddTorrentParams::FromObject(v8::Local<v8::Object> object)
 {
@@ -26,18 +26,18 @@ libtorrent::add_torrent_params AddTorrentParams::FromObject(v8::Local<v8::Object
 
         for (uint32_t i = 0; i < arr->Length(); i++)
         {
-            params.file_priorities.push_back(static_cast<uint8_t>(arr->Get(i)->Int32Value()));
+            params.file_priorities.push_back(libtorrent::download_priority_t(arr->Get(i)->Int32Value()));
         }
     }
 
     if (object->Has(flags) && object->Get(flags)->IsInt32())
     {
-        params.flags = static_cast<libtorrent::add_torrent_params::flags_t>(object->Get(flags)->Int32Value());
+        params.flags = static_cast<libtorrent::torrent_flags_t>(object->Get(flags)->Int32Value());
     }
 
     if (object->Has(active_time) && object->Get(active_time)->IsNumber())
     {
-        params.active_time = object->Get(active_time)->ToNumber()->Int32Value();
+        params.active_time = object->Get(active_time)->ToNumber(v8::Isolate::GetCurrent()->GetCurrentContext()).ToLocalChecked()->Int32Value();
     }
 
     if (object->Has(info_hash) && object->Get(info_hash)->IsString())
@@ -125,7 +125,7 @@ v8::Local<v8::Object> AddTorrentParams::ToObject(libtorrent::add_torrent_params 
 
         for (auto prio : params.file_priorities)
         {
-            fp->Set(i, Nan::New(prio));
+            fp->Set(i, Nan::New(static_cast<uint8_t>(prio)));
             i += 1;
         }
 
@@ -133,7 +133,7 @@ v8::Local<v8::Object> AddTorrentParams::ToObject(libtorrent::add_torrent_params 
     }
 
     obj->Set(Nan::New("finished_time").ToLocalChecked(), Nan::New(params.finished_time));
-    obj->Set(Nan::New("flags").ToLocalChecked(), Nan::New(static_cast<double>(params.flags)));
+    // obj->Set(Nan::New("flags").ToLocalChecked(), Nan::New(static_cast<uint8_t>(params.flags)));
     // have_pieces - obj->Set(Nan::New("flags").ToLocalChecked(), Nan::New(static_cast<double>(params.have_pieces)));
 
     if (params.http_seeds.size() > 0)
@@ -194,7 +194,6 @@ v8::Local<v8::Object> AddTorrentParams::ToObject(libtorrent::add_torrent_params 
     // tracker tiers - obj->Set(Nan::New("trackerid").ToLocalChecked(), Nan::New(params.tracker_tiers));
     // unfinished pieces - obj->Set(Nan::New("trackerid").ToLocalChecked(), Nan::New(params.unfinished_pieces));
     obj->Set(Nan::New("upload_limit").ToLocalChecked(), Nan::New(params.upload_limit));
-    obj->Set(Nan::New("url").ToLocalChecked(), Nan::New(params.url).ToLocalChecked());
     // url seeds - obj->Set(Nan::New("url").ToLocalChecked(), Nan::New(params.url_seeds).ToLocalChecked());
     // user data - obj->Set(Nan::New("url").ToLocalChecked(), Nan::New(params.userdata).ToLocalChecked());
     // verified pieces - obj->Set(Nan::New("url").ToLocalChecked(), Nan::New(params.verified_pieces).ToLocalChecked());

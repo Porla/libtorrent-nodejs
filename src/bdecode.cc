@@ -9,7 +9,7 @@
     #include "_aux/std_make_unique.h"
 #endif
 
-using lt::BDecode;
+using plt::BDecode;
 
 static NAN_METHOD(DoBDecode)
 {
@@ -44,7 +44,7 @@ static NAN_METHOD(DoBDecode)
     libtorrent::entry e;
     e = node;
 
-    info.GetReturnValue().Set(lt::Entry::ToJson(e));
+    info.GetReturnValue().Set(plt::Entry::ToJson(e));
 }
 
 NAN_MODULE_INIT(BDecode::Init)

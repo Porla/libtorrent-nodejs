@@ -9,7 +9,6 @@ namespace libtorrent
     struct torrent_alert;
     struct peer_alert;
     struct tracker_alert;
-    struct torrent_added_alert;
     struct torrent_removed_alert;
     struct read_piece_alert;
     struct file_completed_alert;
@@ -96,7 +95,7 @@ namespace libtorrent
     struct session_error_alert;
 }
 
-namespace lt
+namespace plt
 {
     class AlertTypes
     {
@@ -107,7 +106,6 @@ namespace lt
         static void ToTorrentAlert(v8::Local<v8::Object> obj, libtorrent::torrent_alert* alert);
         static void ToPeerAlert(v8::Local<v8::Object> obj, libtorrent::peer_alert* alert);
         static void ToTrackerAlert(v8::Local<v8::Object> obj, libtorrent::tracker_alert* alert);
-        static void ToTorrentAddedAlert(v8::Local<v8::Object> obj, libtorrent::torrent_added_alert* alert);
         static void ToTorrentRemovedAlert(v8::Local<v8::Object> obj, libtorrent::torrent_removed_alert* alert);
         static void ToReadPieceAlert(v8::Local<v8::Object> obj, libtorrent::read_piece_alert* alert);
         static void ToFileCompletedAlert(v8::Local<v8::Object> obj, libtorrent::file_completed_alert* alert);

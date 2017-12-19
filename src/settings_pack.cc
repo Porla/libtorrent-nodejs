@@ -15,7 +15,7 @@
 #define PORLA_ENUM_SET_STR(obj, member) \
     obj->Set(Nan::New(#member).ToLocalChecked(), Nan::New(libtorrent::settings_pack::string_types::member));
 
-using lt::SettingsPack;
+using plt::SettingsPack;
 
 Nan::Persistent<v8::Function> SettingsPack::constructor;
 
@@ -65,7 +65,6 @@ NAN_MODULE_INIT(SettingsPack::Init)
     PORLA_ENUM_SET_BOOL(bool_types, coalesce_writes);
     PORLA_ENUM_SET_BOOL(bool_types, disable_hash_checks);
     PORLA_ENUM_SET_BOOL(bool_types, dont_count_slow_torrents);
-    PORLA_ENUM_SET_BOOL(bool_types, dont_flush_write_cache);
     PORLA_ENUM_SET_BOOL(bool_types, enable_dht);
     PORLA_ENUM_SET_BOOL(bool_types, enable_incoming_tcp);
     PORLA_ENUM_SET_BOOL(bool_types, enable_incoming_utp);
@@ -77,7 +76,6 @@ NAN_MODULE_INIT(SettingsPack::Init)
     PORLA_ENUM_SET_BOOL(bool_types, force_proxy);
     PORLA_ENUM_SET_BOOL(bool_types, incoming_starts_queued_torrents);
     PORLA_ENUM_SET_BOOL(bool_types, listen_system_port_fallback);
-    PORLA_ENUM_SET_BOOL(bool_types, lock_files);
     PORLA_ENUM_SET_BOOL(bool_types, no_atime_storage);
     PORLA_ENUM_SET_BOOL(bool_types, no_connect_privileged_ports);
     PORLA_ENUM_SET_BOOL(bool_types, no_recheck_incomplete_resume);
@@ -100,7 +98,6 @@ NAN_MODULE_INIT(SettingsPack::Init)
     PORLA_ENUM_SET_BOOL(bool_types, support_share_mode);
     PORLA_ENUM_SET_BOOL(bool_types, upnp_ignore_nonrouters);
     PORLA_ENUM_SET_BOOL(bool_types, use_dht_as_fallback);
-    PORLA_ENUM_SET_BOOL(bool_types, use_disk_cache_pool);
     PORLA_ENUM_SET_BOOL(bool_types, use_parole_mode);
     PORLA_ENUM_SET_BOOL(bool_types, use_read_cache);
     PORLA_ENUM_SET_BOOL(bool_types, volatile_read_cache);
@@ -124,7 +121,6 @@ NAN_MODULE_INIT(SettingsPack::Init)
     PORLA_ENUM_SET_INT(int_types, auto_manage_startup);
     PORLA_ENUM_SET_INT(int_types, auto_scrape_interval);
     PORLA_ENUM_SET_INT(int_types, auto_scrape_min_interval);
-    PORLA_ENUM_SET_INT(int_types, cache_buffer_chunk_size);
     PORLA_ENUM_SET_INT(int_types, cache_expiry);
     PORLA_ENUM_SET_INT(int_types, cache_size);
     PORLA_ENUM_SET_INT(int_types, cache_size_volatile);
@@ -140,7 +136,6 @@ NAN_MODULE_INIT(SettingsPack::Init)
     PORLA_ENUM_SET_INT(int_types, disk_io_read_mode);
     PORLA_ENUM_SET_INT(int_types, disk_io_write_mode);
     PORLA_ENUM_SET_INT(int_types, download_rate_limit);
-    PORLA_ENUM_SET_INT(int_types, file_checks_delay_per_block);
     PORLA_ENUM_SET_INT(int_types, file_pool_size);
     PORLA_ENUM_SET_INT(int_types, handshake_timeout);
     PORLA_ENUM_SET_INT(int_types, i2p_port);
@@ -267,7 +262,7 @@ NAN_METHOD(SettingsPack::New)
     else
     {
         v8::Local<v8::Function> cons = Nan::New(constructor);
-        info.GetReturnValue().Set(cons->NewInstance());
+        info.GetReturnValue().Set(Nan::NewInstance(cons).ToLocalChecked());
     }
 }
 
@@ -299,7 +294,7 @@ v8::Local<v8::Object> SettingsPack::NewInstance(v8::Local<v8::Value> arg)
     const unsigned argc = 1;
     v8::Local<v8::Value> argv[argc] = { arg };
     v8::Local<v8::Function> cons = Nan::New<v8::Function>(constructor);
-    v8::Local<v8::Object> instance = cons->NewInstance(argc, argv);
+    v8::Local<v8::Object> instance = Nan::NewInstance(cons, argc, argv).ToLocalChecked();
 
     return scope.Escape(instance);
 }

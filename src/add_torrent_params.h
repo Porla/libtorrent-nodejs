@@ -9,7 +9,7 @@ namespace libtorrent
     struct add_torrent_params;
 }
 
-namespace lt
+namespace plt
 {
     class AddTorrentParams
     {

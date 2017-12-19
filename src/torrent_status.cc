@@ -7,7 +7,7 @@
 #include "torrent_info.h"
 #include "torrent_handle.h"
 
-using lt::TorrentStatus;
+using plt::TorrentStatus;
 
 v8::Local<v8::Object> TorrentStatus::CreateObject(libtorrent::torrent_status const& ts)
 {
@@ -29,7 +29,6 @@ v8::Local<v8::Object> TorrentStatus::CreateObject(libtorrent::torrent_status con
     status->Set(Nan::New("announcing_to_dht").ToLocalChecked(), Nan::New(ts.announcing_to_dht));
     status->Set(Nan::New("announcing_to_lsd").ToLocalChecked(), Nan::New(ts.announcing_to_lsd));
     status->Set(Nan::New("announcing_to_trackers").ToLocalChecked(), Nan::New(ts.announcing_to_trackers));
-    status->Set(Nan::New("auto_managed").ToLocalChecked(), Nan::New(ts.auto_managed));
     status->Set(Nan::New("block_size").ToLocalChecked(), Nan::New(ts.block_size));
     status->Set(Nan::New("completed_time").ToLocalChecked(), Nan::New(static_cast<double>(ts.completed_time)));
     status->Set(Nan::New("connections_limit").ToLocalChecked(), Nan::New(ts.connections_limit));
@@ -41,7 +40,7 @@ v8::Local<v8::Object> TorrentStatus::CreateObject(libtorrent::torrent_status con
     status->Set(Nan::New("download_payload_rate").ToLocalChecked(), Nan::New(ts.download_payload_rate));
     status->Set(Nan::New("download_rate").ToLocalChecked(), Nan::New(ts.download_rate));
     status->Set(Nan::New("down_bandwidth_queue").ToLocalChecked(), Nan::New(ts.down_bandwidth_queue));
-    status->Set(Nan::New("error_file").ToLocalChecked(), Nan::New(ts.error_file));
+    status->Set(Nan::New("error_file").ToLocalChecked(), Nan::New(static_cast<int>(ts.error_file)));
     // TODO(deprecated) status->Set(Nan::New("finished_time").ToLocalChecked(), Nan::New(ts.finished_time));
 
     libtorrent::torrent_handle th = ts.handle;
@@ -54,7 +53,6 @@ v8::Local<v8::Object> TorrentStatus::CreateObject(libtorrent::torrent_status con
     ss << ts.info_hash;
     status->Set(Nan::New("info_hash").ToLocalChecked(), Nan::New(ss.str()).ToLocalChecked());
 
-    status->Set(Nan::New("ip_filter_applies").ToLocalChecked(), Nan::New(ts.ip_filter_applies));
     status->Set(Nan::New("is_finished").ToLocalChecked(), Nan::New(ts.is_finished));
     status->Set(Nan::New("is_seeding").ToLocalChecked(), Nan::New(ts.is_seeding));
     // TODO(deprecated) status->Set(Nan::New("last_scrape").ToLocalChecked(), Nan::New(ts.last_scrape));
@@ -72,21 +70,15 @@ v8::Local<v8::Object> TorrentStatus::CreateObject(libtorrent::torrent_status con
     status->Set(Nan::New("num_pieces").ToLocalChecked(), Nan::New(ts.num_pieces));
     status->Set(Nan::New("num_seeds").ToLocalChecked(), Nan::New(ts.num_seeds));
     status->Set(Nan::New("num_uploads").ToLocalChecked(), Nan::New(ts.num_uploads));
-    status->Set(Nan::New("paused").ToLocalChecked(), Nan::New(ts.paused));
     // status->Set(Nan::New("paused").ToLocalChecked(), Nan::New(ts.pieces));
     status->Set(Nan::New("progress").ToLocalChecked(), Nan::New(ts.progress));
     status->Set(Nan::New("progress_ppm").ToLocalChecked(), Nan::New(ts.progress_ppm));
-    status->Set(Nan::New("queue_position").ToLocalChecked(), Nan::New(ts.queue_position));
+    status->Set(Nan::New("queue_position").ToLocalChecked(), Nan::New(static_cast<int>(ts.queue_position)));
     status->Set(Nan::New("save_path").ToLocalChecked(), Nan::New(ts.save_path).ToLocalChecked());
     // TODO(deprecated) status->Set(Nan::New("seeding_time").ToLocalChecked(), Nan::New(ts.seeding_time));
-    status->Set(Nan::New("seed_mode").ToLocalChecked(), Nan::New(ts.seed_mode));
     status->Set(Nan::New("seed_rank").ToLocalChecked(), Nan::New(ts.seed_rank));
-    status->Set(Nan::New("sequential_download").ToLocalChecked(), Nan::New(ts.sequential_download));
-    status->Set(Nan::New("share_mode").ToLocalChecked(), Nan::New(ts.share_mode));
     status->Set(Nan::New("state").ToLocalChecked(), Nan::New(ts.state));
-    status->Set(Nan::New("stop_when_ready").ToLocalChecked(), Nan::New(ts.stop_when_ready));
     status->Set(Nan::New("storage_mode").ToLocalChecked(), Nan::New(ts.storage_mode));
-    status->Set(Nan::New("super_seeding").ToLocalChecked(), Nan::New(ts.super_seeding));
     // TODO(deprecated) status->Set(Nan::New("time_since_download").ToLocalChecked(), Nan::New(ts.time_since_download));
     // TODO(deprecated) status->Set(Nan::New("time_since_upload").ToLocalChecked(), Nan::New(ts.time_since_upload));
 
@@ -106,7 +98,6 @@ v8::Local<v8::Object> TorrentStatus::CreateObject(libtorrent::torrent_status con
     status->Set(Nan::New("total_wanted").ToLocalChecked(), Nan::New(static_cast<double>(ts.total_wanted)));
     status->Set(Nan::New("total_wanted_done").ToLocalChecked(), Nan::New(static_cast<double>(ts.total_wanted_done)));
     status->Set(Nan::New("uploads_limit").ToLocalChecked(), Nan::New(ts.uploads_limit));
-    status->Set(Nan::New("upload_mode").ToLocalChecked(), Nan::New(ts.upload_mode));
     status->Set(Nan::New("upload_payload_rate").ToLocalChecked(), Nan::New(ts.upload_payload_rate));
     status->Set(Nan::New("upload_rate").ToLocalChecked(), Nan::New(ts.upload_rate));
     status->Set(Nan::New("up_bandwidth_queue").ToLocalChecked(), Nan::New(ts.up_bandwidth_queue));

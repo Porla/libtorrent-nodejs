@@ -9,7 +9,7 @@ namespace libtorrent
     class torrent_info;
 }
 
-namespace lt
+namespace plt
 {
     class TorrentInfo : public Nan::ObjectWrap
     {
@@ -45,7 +45,6 @@ namespace lt
         static NAN_METHOD(MapBlock);
         static NAN_METHOD(MapFile);
         static NAN_METHOD(Load);
-        static NAN_METHOD(Unload);
         static NAN_METHOD(SslCert);
         static NAN_METHOD(IsValid);
         static NAN_METHOD(Priv);

@@ -4,11 +4,11 @@
 
 #include <libtorrent/bencode.hpp>
 
-using lt::BEncode;
+using plt::BEncode;
 
 NAN_METHOD(DoBEncode)
 {
-    libtorrent::entry e = lt::Entry::FromJson(info[0]);
+    libtorrent::entry e = plt::Entry::FromJson(info[0]);
     std::vector<char> buf;
     libtorrent::bencode(std::back_inserter(buf), e);
 

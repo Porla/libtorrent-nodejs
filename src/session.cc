@@ -15,7 +15,7 @@
 #include "torrent_info.h"
 #include "torrent_status.h"
 
-using lt::Session;
+using plt::Session;
 
 Nan::Persistent<v8::Function> Session::constructor;
 
@@ -199,8 +199,7 @@ NAN_METHOD(Session::GetTorrentStatus)
     Session* obj = Nan::ObjectWrap::Unwrap<Session>(info.This());
     v8::Local<v8::Function> func = info[0].As<v8::Function>();
 
-    std::vector<libtorrent::torrent_status> list;
-    obj->wrap_->get_torrent_status(&list, [func](const libtorrent::torrent_status& ts) {
+    std::vector<libtorrent::torrent_status> list = obj->wrap_->get_torrent_status([func](const libtorrent::torrent_status& ts) {
         const unsigned argc = 1;
 
         v8::Local<v8::Object> status = TorrentStatus::CreateObject(ts);
@@ -289,18 +288,26 @@ NAN_METHOD(Session::RemoveTorrent)
     Session* obj = Nan::ObjectWrap::Unwrap<Session>(info.This());
     TorrentHandle* th = Nan::ObjectWrap::Unwrap<TorrentHandle>(info[0]->ToObject());
 
-    int options = 0;
+    libtorrent::remove_flags_t options = {};
 
     if (info.Length() >= 2 && info[1]->IsObject())
     {
         auto params = info[1]->ToObject();
         auto remove_files = Nan::New("delete_files").ToLocalChecked();
+        auto remove_partfile = Nan::New("delete_partfile").ToLocalChecked();
 
         if (params->Has(remove_files)
             && params->Get(remove_files)->IsBoolean()
             && params->Get(remove_files)->ToBoolean()->Value())
         {
-            options = libtorrent::session::options_t::delete_files;
+            options |= libtorrent::session::delete_files;
+        }
+
+        if (params->Has(remove_partfile)
+            && params->Get(remove_partfile)->IsBoolean()
+            && params->Get(remove_partfile)->ToBoolean()->Value())
+        {
+            options |= libtorrent::session::delete_partfile;
         }
     }
 

@@ -139,6 +139,11 @@ describe('libtorrent', function() {
 
         it("can wait for alert", function(done) {
             var obj = new lt.session();
+            obj.add_torrent({
+                flags: 0x020,
+                save_path: "./",
+                ti: new lt.torrent_info("res/debian-8.5.0-amd64-netinst.iso.torrent")
+            });
             obj.wait_for_alert(10000, function(error, result) {
                 assert.equal(result, true);
                 done();
@@ -308,24 +313,8 @@ describe('libtorrent', function() {
             handle.resume();
         });
 
-        it("stop_when_ready()", function() {
-            handle.stop_when_ready(true);
-        });
-
-        it("set_upload_mode()", function() {
-            handle.set_upload_mode(true);
-        });
-
-        it("set_share_mode()", function() {
-            handle.set_share_mode(true);
-        });
-
         it("flush_cache()", function() {
             handle.flush_cache();
-        });
-
-        it("apply_ip_filter()", function() {
-            handle.apply_ip_filter(true);
         });
 
         it("force_recheck()", function() {
@@ -338,10 +327,6 @@ describe('libtorrent', function() {
 
         it("need_save_resume_data()", function() {
             assert.equal("boolean", typeof handle.need_save_resume_data());
-        });
-
-        it("auto_managed()", function() {
-            handle.auto_managed(true);
         });
 
         it("queue_position()", function() {
@@ -388,8 +373,8 @@ describe('libtorrent', function() {
             handle.prioritize_pieces([1,1,1]);
         });
 
-        it("piece_priorities", function() {
-            assert(handle.piece_priorities().length >= 0);
+        it("get_piece_priorities", function() {
+            assert(handle.get_piece_priorities().length >= 0);
         });
 
         it("file_priority(0)", function() {
@@ -404,8 +389,8 @@ describe('libtorrent', function() {
             handle.prioritize_files([1,1,1]);
         });
 
-        it("file_priorities()", function() {
-            assert(handle.file_priorities().length >= 0);
+        it("get_file_priorities()", function() {
+            assert(handle.get_file_priorities().length >= 0);
         });
 
         it("force_reannounce(1,1)", function() {
@@ -434,10 +419,6 @@ describe('libtorrent', function() {
 
         it("download_limit()", function() {
             assert.equal("number", typeof handle.download_limit());
-        });
-
-        it("set_sequential_download()", function() {
-            handle.set_sequential_download(true);
         });
 
         it("connect_peer()", function() {

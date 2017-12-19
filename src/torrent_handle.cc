@@ -13,7 +13,7 @@
 #include "torrent_info.h"
 #include "torrent_status.h"
 
-using lt::TorrentHandle;
+using plt::TorrentHandle;
 
 Nan::Persistent<v8::Function> TorrentHandle::constructor;
 
@@ -63,15 +63,10 @@ NAN_MODULE_INIT(TorrentHandle::Init)
     Nan::SetPrototypeMethod(tpl, "is_valid", IsValid);
     Nan::SetPrototypeMethod(tpl, "pause", Pause);
     Nan::SetPrototypeMethod(tpl, "resume", Resume);
-    Nan::SetPrototypeMethod(tpl, "stop_when_ready", StopWhenReady);
-    Nan::SetPrototypeMethod(tpl, "set_upload_mode", SetUploadMode);
-    Nan::SetPrototypeMethod(tpl, "set_share_mode", SetShareMode);
     Nan::SetPrototypeMethod(tpl, "flush_cache", FlushCache);
-    Nan::SetPrototypeMethod(tpl, "apply_ip_filter", ApplyIpFilter);
     Nan::SetPrototypeMethod(tpl, "force_recheck", ForceRecheck);
     Nan::SetPrototypeMethod(tpl, "save_resume_data", SaveResumeData);
     Nan::SetPrototypeMethod(tpl, "need_save_resume_data", NeedSaveResumeData);
-    Nan::SetPrototypeMethod(tpl, "auto_managed", AutoManaged);
     Nan::SetPrototypeMethod(tpl, "queue_position", QueuePosition);
     Nan::SetPrototypeMethod(tpl, "queue_position_up", QueuePositionUp);
     Nan::SetPrototypeMethod(tpl, "queue_position_down", QueuePositionDown);
@@ -84,10 +79,10 @@ NAN_MODULE_INIT(TorrentHandle::Init)
     Nan::SetPrototypeMethod(tpl, "piece_availability", PieceAvailability);
     Nan::SetPrototypeMethod(tpl, "piece_priority", PiecePriority);
     Nan::SetPrototypeMethod(tpl, "prioritize_pieces", PrioritizePieces);
-    Nan::SetPrototypeMethod(tpl, "piece_priorities", PiecePriorities);
+    Nan::SetPrototypeMethod(tpl, "get_piece_priorities", GetPiecePriorities);
     Nan::SetPrototypeMethod(tpl, "file_priority", FilePriority);
     Nan::SetPrototypeMethod(tpl, "prioritize_files", PrioritizeFiles);
-    Nan::SetPrototypeMethod(tpl, "file_priorities", FilePriorities);
+    Nan::SetPrototypeMethod(tpl, "get_file_priorities", GetFilePriorities);
     Nan::SetPrototypeMethod(tpl, "force_reannounce", ForceReannounce);
     Nan::SetPrototypeMethod(tpl, "force_dht_announce", ForceDhtAnnounce);
     Nan::SetPrototypeMethod(tpl, "scrape_tracker", ScrapeTracker);
@@ -95,7 +90,6 @@ NAN_MODULE_INIT(TorrentHandle::Init)
     Nan::SetPrototypeMethod(tpl, "upload_limit", UploadLimit);
     Nan::SetPrototypeMethod(tpl, "set_download_limit", SetDownloadLimit);
     Nan::SetPrototypeMethod(tpl, "download_limit", DownloadLimit);
-    Nan::SetPrototypeMethod(tpl, "set_sequential_download", SetSequentialDownload);
     Nan::SetPrototypeMethod(tpl, "connect_peer", ConnectPeer);
     Nan::SetPrototypeMethod(tpl, "set_max_uploads", SetMaxUploads);
     Nan::SetPrototypeMethod(tpl, "max_uploads", MaxUploads);
@@ -103,7 +97,6 @@ NAN_MODULE_INIT(TorrentHandle::Init)
     Nan::SetPrototypeMethod(tpl, "max_connections", MaxConnections);
     Nan::SetPrototypeMethod(tpl, "move_storage", MoveStorage);
     Nan::SetPrototypeMethod(tpl, "rename_file", RenameFile);
-    Nan::SetPrototypeMethod(tpl, "super_seeding", SuperSeeding);
     Nan::SetPrototypeMethod(tpl, "info_hash", InfoHash);
     Nan::SetPrototypeMethod(tpl, "id", Id);
 
@@ -125,7 +118,7 @@ NAN_METHOD(TorrentHandle::New)
     else
     {
         v8::Local<v8::Function> cons = Nan::New(constructor);
-        info.GetReturnValue().Set(cons->NewInstance());
+        info.GetReturnValue().Set(Nan::NewInstance(cons).ToLocalChecked());
     }
 }
 
@@ -136,7 +129,7 @@ v8::Local<v8::Object> TorrentHandle::NewInstance(v8::Local<v8::Value> arg)
     const unsigned argc = 1;
     v8::Local<v8::Value> argv[argc] = { arg };
     v8::Local<v8::Function> cons = Nan::New<v8::Function>(constructor);
-    v8::Local<v8::Object> instance = cons->NewInstance(argc, argv);
+    v8::Local<v8::Object> instance = Nan::NewInstance(cons, argc, argv).ToLocalChecked();
 
     return scope.Escape(instance);
 }
@@ -145,13 +138,13 @@ NAN_METHOD(TorrentHandle::AddPiece)
 {
     TorrentHandle* obj = Nan::ObjectWrap::Unwrap<TorrentHandle>(info.This());
 
-    int pieceIndex = info[0]->Int32Value();
+    libtorrent::piece_index_t pieceIndex(info[0]->Int32Value());
     const char* data = node::Buffer::Data(info[1]);
-    int flags = 0;
+    libtorrent::add_piece_flags_t flags = {};
 
     if (info.Length() >= 3)
     {
-        flags = info[0]->Int32Value();
+        flags = libtorrent::add_piece_flags_t(info[0]->Int32Value());
     }
 
     obj->th_->add_piece(pieceIndex, data, flags);
@@ -160,13 +153,13 @@ NAN_METHOD(TorrentHandle::AddPiece)
 NAN_METHOD(TorrentHandle::ReadPiece)
 {
     TorrentHandle* obj = Nan::ObjectWrap::Unwrap<TorrentHandle>(info.This());
-    obj->th_->read_piece(info[0]->Int32Value());
+    obj->th_->read_piece(libtorrent::piece_index_t(info[0]->Int32Value()));
 }
 
 NAN_METHOD(TorrentHandle::HavePiece)
 {
     TorrentHandle* obj = Nan::ObjectWrap::Unwrap<TorrentHandle>(info.This());
-    int idx = info[0]->Int32Value();
+    libtorrent::piece_index_t idx(info[0]->Int32Value());
     info.GetReturnValue().Set(Nan::New(obj->th_->have_piece(idx)));
 }
 
@@ -188,7 +181,7 @@ NAN_METHOD(TorrentHandle::GetPeerInfo)
         p->Set(Nan::New("client").ToLocalChecked(), Nan::New(pi.client).ToLocalChecked());
         p->Set(Nan::New("connection_type").ToLocalChecked(), Nan::New(pi.connection_type));
         p->Set(Nan::New("downloading_block_index").ToLocalChecked(), Nan::New(pi.downloading_block_index));
-        p->Set(Nan::New("downloading_piece_index").ToLocalChecked(), Nan::New(pi.downloading_piece_index));
+        p->Set(Nan::New("downloading_piece_index").ToLocalChecked(), Nan::New(static_cast<int>(pi.downloading_piece_index)));
         p->Set(Nan::New("downloading_progress").ToLocalChecked(), Nan::New(pi.downloading_progress));
         p->Set(Nan::New("downloading_total").ToLocalChecked(), Nan::New(pi.downloading_total));
         p->Set(Nan::New("download_queue_length").ToLocalChecked(), Nan::New(pi.download_queue_length));
@@ -197,7 +190,7 @@ NAN_METHOD(TorrentHandle::GetPeerInfo)
         p->Set(Nan::New("down_speed").ToLocalChecked(), Nan::New(pi.down_speed));
         p->Set(Nan::New("estimated_reciprocation_rate").ToLocalChecked(), Nan::New(pi.estimated_reciprocation_rate));
         p->Set(Nan::New("failcount").ToLocalChecked(), Nan::New(pi.failcount));
-        p->Set(Nan::New("flags").ToLocalChecked(), Nan::New(pi.flags));
+        // TODO p->Set(Nan::New("flags").ToLocalChecked(), Nan::New(static_cast<uint8_t>(pi.flags)));
 
         v8::Local<v8::Array> ip = Nan::New<v8::Array>(2);
         ip->Set(0, Nan::New(pi.ip.address().to_string()).ToLocalChecked());
@@ -227,7 +220,7 @@ NAN_METHOD(TorrentHandle::GetPeerInfo)
         p->Set(Nan::New("progress").ToLocalChecked(), Nan::New(pi.progress));
         p->Set(Nan::New("progress_ppm").ToLocalChecked(), Nan::New(pi.progress_ppm));
         p->Set(Nan::New("queue_bytes").ToLocalChecked(), Nan::New(pi.queue_bytes));
-        p->Set(Nan::New("read_state").ToLocalChecked(), Nan::New(pi.read_state));
+        p->Set(Nan::New("read_state").ToLocalChecked(), Nan::New(static_cast<uint8_t>(pi.read_state)));
         p->Set(Nan::New("receive_buffer_size").ToLocalChecked(), Nan::New(pi.receive_buffer_size));
         p->Set(Nan::New("receive_buffer_watermark").ToLocalChecked(), Nan::New(pi.receive_buffer_watermark));
         p->Set(Nan::New("receive_quota").ToLocalChecked(), Nan::New(pi.receive_quota));
@@ -236,7 +229,7 @@ NAN_METHOD(TorrentHandle::GetPeerInfo)
         p->Set(Nan::New("rtt").ToLocalChecked(), Nan::New(pi.rtt));
         p->Set(Nan::New("send_buffer_size").ToLocalChecked(), Nan::New(pi.send_buffer_size));
         p->Set(Nan::New("send_quota").ToLocalChecked(), Nan::New(pi.send_quota));
-        p->Set(Nan::New("source").ToLocalChecked(), Nan::New(pi.source));
+        p->Set(Nan::New("source").ToLocalChecked(), Nan::New(static_cast<uint8_t>(pi.source)));
         p->Set(Nan::New("target_dl_queue_length").ToLocalChecked(), Nan::New(pi.target_dl_queue_length));
         p->Set(Nan::New("timed_out_requests").ToLocalChecked(), Nan::New(pi.timed_out_requests));
         p->Set(Nan::New("total_download").ToLocalChecked(), Nan::New(static_cast<double>(pi.total_download)));
@@ -246,7 +239,7 @@ NAN_METHOD(TorrentHandle::GetPeerInfo)
         p->Set(Nan::New("up_speed").ToLocalChecked(), Nan::New(pi.up_speed));
         p->Set(Nan::New("used_receive_buffer").ToLocalChecked(), Nan::New(pi.used_receive_buffer));
         p->Set(Nan::New("used_send_buffer").ToLocalChecked(), Nan::New(pi.used_send_buffer));
-        p->Set(Nan::New("write_state").ToLocalChecked(), Nan::New(pi.write_state));
+        p->Set(Nan::New("write_state").ToLocalChecked(), Nan::New(static_cast<uint8_t>(pi.write_state)));
 
         arr->Set(i, p);
     }
@@ -272,13 +265,13 @@ NAN_METHOD(TorrentHandle::SetPieceDeadline)
 {
     TorrentHandle* obj = Nan::ObjectWrap::Unwrap<TorrentHandle>(info.This());
 
-    int piece = info[0]->Int32Value();
+    libtorrent::piece_index_t piece(info[0]->Int32Value());
     int deadline = info[1]->Int32Value();
-    int flags = 0;
+    libtorrent::deadline_flags_t flags = {};
 
     if (info.Length() >= 3)
     {
-        flags = info[2]->Int32Value();
+        flags = libtorrent::deadline_flags_t(static_cast<uint8_t>(info[2]->Int32Value()));
     }
 
     obj->th_->set_piece_deadline(piece, deadline, flags);
@@ -287,7 +280,7 @@ NAN_METHOD(TorrentHandle::SetPieceDeadline)
 NAN_METHOD(TorrentHandle::ResetPieceDeadline)
 {
     TorrentHandle* obj = Nan::ObjectWrap::Unwrap<TorrentHandle>(info.This());
-    obj->th_->reset_piece_deadline(info[0]->Int32Value());
+    obj->th_->reset_piece_deadline(libtorrent::piece_index_t(info[0]->Int32Value()));
 }
 
 NAN_METHOD(TorrentHandle::ClearPieceDeadlines)
@@ -344,30 +337,13 @@ NAN_METHOD(TorrentHandle::Trackers)
         libtorrent::announce_entry& ae = trackers.at(i);
 
         v8::Local<v8::Object> t = Nan::New<v8::Object>();
-        t->Set(Nan::New("complete_sent").ToLocalChecked(), Nan::New(ae.complete_sent));
-        t->Set(Nan::New("fails").ToLocalChecked(), Nan::New(ae.fails));
         t->Set(Nan::New("fail_limit").ToLocalChecked(), Nan::New(ae.fail_limit));
 
-        if (ae.last_error)
-        {
-            v8::Local<v8::Object> err = Nan::New<v8::Object>();
-            err->Set(Nan::New("message").ToLocalChecked(), Nan::New(ae.last_error.message()).ToLocalChecked());
-            err->Set(Nan::New("value").ToLocalChecked(), Nan::New(ae.last_error.value()));
-            t->Set(Nan::New("last_error").ToLocalChecked(), err);
-        }
-
-        t->Set(Nan::New("message").ToLocalChecked(), Nan::New(ae.message).ToLocalChecked());
         // TODO: t->Set(Nan::New("min_announce").ToLocalChecked(), Nan::New(ae.min_announce).ToLocalChecked());
         // TODO: t->Set(Nan::New("next_announce").ToLocalChecked(), Nan::New(ae.next_announce).ToLocalChecked());
-        t->Set(Nan::New("scrape_complete").ToLocalChecked(), Nan::New(ae.scrape_complete));
-        t->Set(Nan::New("scrape_downloaded").ToLocalChecked(), Nan::New(ae.scrape_downloaded));
-        t->Set(Nan::New("scrape_incomplete").ToLocalChecked(), Nan::New(ae.scrape_incomplete));
         t->Set(Nan::New("source").ToLocalChecked(), Nan::New(ae.source));
-        t->Set(Nan::New("start_sent").ToLocalChecked(), Nan::New(ae.start_sent));
         t->Set(Nan::New("tier").ToLocalChecked(), Nan::New(ae.tier));
         t->Set(Nan::New("trackerid").ToLocalChecked(), Nan::New(ae.trackerid).ToLocalChecked());
-        t->Set(Nan::New("triggered_manually").ToLocalChecked(), Nan::New(ae.triggered_manually));
-        t->Set(Nan::New("updating").ToLocalChecked(), Nan::New(ae.updating));
         t->Set(Nan::New("url").ToLocalChecked(), Nan::New(ae.url).ToLocalChecked());
         t->Set(Nan::New("verified").ToLocalChecked(), Nan::New(ae.verified));
 
@@ -509,34 +485,10 @@ NAN_METHOD(TorrentHandle::Resume)
     obj->th_->resume();
 }
 
-NAN_METHOD(TorrentHandle::StopWhenReady)
-{
-    TorrentHandle* obj = Nan::ObjectWrap::Unwrap<TorrentHandle>(info.This());
-    obj->th_->stop_when_ready(info[0]->BooleanValue());
-}
-
-NAN_METHOD(TorrentHandle::SetUploadMode)
-{
-    TorrentHandle* obj = Nan::ObjectWrap::Unwrap<TorrentHandle>(info.This());
-    obj->th_->set_upload_mode(info[0]->BooleanValue());
-}
-
-NAN_METHOD(TorrentHandle::SetShareMode)
-{
-    TorrentHandle* obj = Nan::ObjectWrap::Unwrap<TorrentHandle>(info.This());
-    obj->th_->set_share_mode(info[0]->BooleanValue());
-}
-
 NAN_METHOD(TorrentHandle::FlushCache)
 {
     TorrentHandle* obj = Nan::ObjectWrap::Unwrap<TorrentHandle>(info.This());
     obj->th_->flush_cache();
-}
-
-NAN_METHOD(TorrentHandle::ApplyIpFilter)
-{
-    TorrentHandle* obj = Nan::ObjectWrap::Unwrap<TorrentHandle>(info.This());
-    obj->th_->apply_ip_filter(info[0]->BooleanValue());
 }
 
 NAN_METHOD(TorrentHandle::ForceRecheck)
@@ -549,7 +501,7 @@ NAN_METHOD(TorrentHandle::SaveResumeData)
 {
     TorrentHandle* obj = Nan::ObjectWrap::Unwrap<TorrentHandle>(info.This());
     int flags = info.Length() > 0 ? info[0]->Int32Value() : 0;
-    obj->th_->save_resume_data(flags);
+    obj->th_->save_resume_data(libtorrent::resume_data_flags_t(flags));
 }
 
 NAN_METHOD(TorrentHandle::NeedSaveResumeData)
@@ -558,16 +510,10 @@ NAN_METHOD(TorrentHandle::NeedSaveResumeData)
     info.GetReturnValue().Set(Nan::New(obj->th_->need_save_resume_data()));
 }
 
-NAN_METHOD(TorrentHandle::AutoManaged)
-{
-    TorrentHandle* obj = Nan::ObjectWrap::Unwrap<TorrentHandle>(info.This());
-    obj->th_->auto_managed(info[0]->BooleanValue());
-}
-
 NAN_METHOD(TorrentHandle::QueuePosition)
 {
     TorrentHandle* obj = Nan::ObjectWrap::Unwrap<TorrentHandle>(info.This());
-    info.GetReturnValue().Set(Nan::New(obj->th_->queue_position()));
+    info.GetReturnValue().Set(Nan::New(static_cast<int>(obj->th_->queue_position())));
 }
 
 NAN_METHOD(TorrentHandle::QueuePositionUp)
@@ -658,13 +604,23 @@ NAN_METHOD(TorrentHandle::PiecePriority)
 
     if (info.Length() == 1)
     {
-        info.GetReturnValue().Set(Nan::New(obj->th_->piece_priority(info[0]->Int32Value())));
+        info.GetReturnValue().Set(
+            Nan::New(
+                static_cast<uint8_t>(
+                    obj->th_->piece_priority(
+                        libtorrent::piece_index_t(
+                            info[0]->Int32Value()
+                        )
+                    )
+                )
+            )
+        );
     }
     else if (info.Length() >= 2)
     {
         obj->th_->piece_priority(
-            info[0]->Int32Value(),
-            info[1]->Int32Value());
+            libtorrent::piece_index_t(info[0]->Int32Value()),
+            libtorrent::download_priority_t(info[1]->Int32Value()));
     }
     else
     {
@@ -686,13 +642,13 @@ NAN_METHOD(TorrentHandle::PrioritizePieces)
     {
         // [ { index: 1, priority: 1 }]
 
-        std::vector<std::pair<int, int>> prios;
+        std::vector<std::pair<libtorrent::piece_index_t, libtorrent::download_priority_t>> prios;
 
         for (uint32_t i = 0; i < arr->Length(); i++)
         {
             v8::Local<v8::Object> pi = arr->Get(i)->ToObject();
-            int index = pi->Get(Nan::New("index").ToLocalChecked())->Int32Value();
-            int priority = pi->Get(Nan::New("priority").ToLocalChecked())->Int32Value();
+            libtorrent::piece_index_t index(pi->Get(Nan::New("index").ToLocalChecked())->Int32Value());
+            libtorrent::download_priority_t priority(pi->Get(Nan::New("priority").ToLocalChecked())->Int32Value());
 
             prios.push_back({ index, priority });
         }
@@ -704,11 +660,11 @@ NAN_METHOD(TorrentHandle::PrioritizePieces)
     {
         // [ 1, 2 ]
 
-        std::vector<int> prios;
+        std::vector<libtorrent::download_priority_t> prios;
 
         for (uint32_t i = 0; i < arr->Length(); i++)
         {
-            prios.push_back(arr->Get(i)->Int32Value());
+            prios.push_back(libtorrent::download_priority_t(arr->Get(i)->Int32Value()));
         }
 
         obj->th_->prioritize_pieces(prios);
@@ -719,16 +675,16 @@ NAN_METHOD(TorrentHandle::PrioritizePieces)
     }
 }
 
-NAN_METHOD(TorrentHandle::PiecePriorities)
+NAN_METHOD(TorrentHandle::GetPiecePriorities)
 {
     TorrentHandle* obj = Nan::ObjectWrap::Unwrap<TorrentHandle>(info.This());
-    std::vector<int> prios = obj->th_->piece_priorities();
+    std::vector<libtorrent::download_priority_t> prios = obj->th_->get_piece_priorities();
 
     v8::Local<v8::Array> arr = Nan::New<v8::Array>(static_cast<uint32_t>(prios.size()));
 
     for (uint32_t i = 0; i < arr->Length(); i++)
     {
-        arr->Set(i, Nan::New(prios.at(i)));
+        arr->Set(i, Nan::New(static_cast<uint8_t>(prios.at(i))));
     }
 
     info.GetReturnValue().Set(arr);
@@ -740,13 +696,13 @@ NAN_METHOD(TorrentHandle::FilePriority)
 
     if (info.Length() == 1)
     {
-        info.GetReturnValue().Set(Nan::New(obj->th_->file_priority(info[0]->Int32Value())));
+        info.GetReturnValue().Set(Nan::New(static_cast<uint8_t>(obj->th_->file_priority(libtorrent::file_index_t(info[0]->Int32Value())))));
     }
     else if (info.Length() >= 2)
     {
         obj->th_->file_priority(
-            info[0]->Int32Value(),
-            info[1]->Int32Value());
+            libtorrent::file_index_t(info[0]->Int32Value()),
+            libtorrent::download_priority_t(info[1]->Int32Value()));
     }
     else
     {
@@ -766,11 +722,11 @@ NAN_METHOD(TorrentHandle::PrioritizeFiles)
 
     if (arr->Get(0)->IsNumber())
     {
-        std::vector<int> prios;
+        std::vector<libtorrent::download_priority_t> prios;
 
         for (uint32_t i = 0; i < arr->Length(); i++)
         {
-            prios.push_back(arr->Get(i)->Int32Value());
+            prios.push_back(libtorrent::download_priority_t(arr->Get(i)->Int32Value()));
         }
 
         obj->th_->prioritize_files(prios);
@@ -781,16 +737,16 @@ NAN_METHOD(TorrentHandle::PrioritizeFiles)
     }
 }
 
-NAN_METHOD(TorrentHandle::FilePriorities)
+NAN_METHOD(TorrentHandle::GetFilePriorities)
 {
     TorrentHandle* obj = Nan::ObjectWrap::Unwrap<TorrentHandle>(info.This());
-    std::vector<int> prios = obj->th_->file_priorities();
+    std::vector<libtorrent::download_priority_t> prios = obj->th_->get_file_priorities();
 
     v8::Local<v8::Array> arr = Nan::New<v8::Array>(static_cast<uint32_t>(prios.size()));
 
     for (uint32_t i = 0; i < arr->Length(); i++)
     {
-        arr->Set(i, Nan::New(prios.at(i)));
+        arr->Set(i, Nan::New(static_cast<uint8_t>(prios.at(i))));
     }
 
     info.GetReturnValue().Set(arr);
@@ -840,12 +796,6 @@ NAN_METHOD(TorrentHandle::DownloadLimit)
     info.GetReturnValue().Set(Nan::New(obj->th_->download_limit()));
 }
 
-NAN_METHOD(TorrentHandle::SetSequentialDownload)
-{
-    TorrentHandle* obj = Nan::ObjectWrap::Unwrap<TorrentHandle>(info.This());
-    obj->th_->set_sequential_download(info[0]->BooleanValue());
-}
-
 NAN_METHOD(TorrentHandle::ConnectPeer)
 {
     TorrentHandle* obj = Nan::ObjectWrap::Unwrap<TorrentHandle>(info.This());
@@ -888,19 +838,13 @@ NAN_METHOD(TorrentHandle::MoveStorage)
     TorrentHandle* obj = Nan::ObjectWrap::Unwrap<TorrentHandle>(info.This());
     obj->th_->move_storage(
         *Nan::Utf8String(info[0]),
-        info.Length() >= 2 ? info[1]->Int32Value() : 0);
+        libtorrent::move_flags_t(info.Length() >= 2 ? info[1]->Int32Value() : 0));
 }
 
 NAN_METHOD(TorrentHandle::RenameFile)
 {
     TorrentHandle* obj = Nan::ObjectWrap::Unwrap<TorrentHandle>(info.This());
-    obj->th_->rename_file(info[0]->Int32Value(), *Nan::Utf8String(info[1]));
-}
-
-NAN_METHOD(TorrentHandle::SuperSeeding)
-{
-    TorrentHandle* obj = Nan::ObjectWrap::Unwrap<TorrentHandle>(info.This());
-    obj->th_->super_seeding(info[0]->BooleanValue());
+    obj->th_->rename_file(libtorrent::file_index_t(info[0]->Int32Value()), *Nan::Utf8String(info[1]));
 }
 
 NAN_METHOD(TorrentHandle::InfoHash)

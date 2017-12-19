@@ -9,7 +9,7 @@ namespace libtorrent
     struct torrent_status;
 }
 
-namespace lt
+namespace plt
 {
     class TorrentStatus
     {

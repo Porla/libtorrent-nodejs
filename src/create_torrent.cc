@@ -10,7 +10,7 @@
     #include "_aux/std_make_unique.h"
 #endif
 
-using lt::CreateTorrent;
+using plt::CreateTorrent;
 
 Nan::Persistent<v8::Function> CreateTorrent::constructor;
 

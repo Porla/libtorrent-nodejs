@@ -4,7 +4,7 @@
 
 #include <libtorrent/file_storage.hpp>
 
-using lt::FileStorage;
+using plt::FileStorage;
 
 Nan::Persistent<v8::Function> FileStorage::constructor;
 
@@ -31,7 +31,6 @@ NAN_MODULE_INIT(FileStorage::Init)
     Nan::SetPrototypeMethod(tpl, "piece_length", PieceSize);
     Nan::SetPrototypeMethod(tpl, "piece_size", PieceSize);
     Nan::SetPrototypeMethod(tpl, "name", Name);
-    Nan::SetPrototypeMethod(tpl, "is_loaded", IsLoaded);
     Nan::SetPrototypeMethod(tpl, "hash", Hash);
     Nan::SetPrototypeMethod(tpl, "symlink", Symlink);
     Nan::SetPrototypeMethod(tpl, "mtime", Mtime);
@@ -67,7 +66,7 @@ v8::Local<v8::Object> FileStorage::NewInstance(v8::Local<v8::Value> arg)
     const unsigned argc = 1;
     v8::Local<v8::Value> argv[argc] = { arg };
     v8::Local<v8::Function> cons = Nan::New<v8::Function>(constructor);
-    v8::Local<v8::Object> instance = cons->NewInstance(argc, argv);
+    v8::Local<v8::Object> instance = Nan::NewInstance(cons, argc, argv).ToLocalChecked();
 
     return scope.Escape(instance);
 }
@@ -105,7 +104,7 @@ NAN_METHOD(FileStorage::PieceLength)
 NAN_METHOD(FileStorage::PieceSize)
 {
     FileStorage* obj = Nan::ObjectWrap::Unwrap<FileStorage>(info.This());
-    info.GetReturnValue().Set(Nan::New(obj->fs_.get().piece_size(info[0]->Int32Value())));
+    info.GetReturnValue().Set(Nan::New(obj->fs_.get().piece_size(libtorrent::piece_index_t(info[0]->Int32Value()))));
 }
 
 NAN_METHOD(FileStorage::Name)
@@ -114,24 +113,18 @@ NAN_METHOD(FileStorage::Name)
     info.GetReturnValue().Set(Nan::New(obj->fs_.get().name()).ToLocalChecked());
 }
 
-NAN_METHOD(FileStorage::IsLoaded)
-{
-    FileStorage* obj = Nan::ObjectWrap::Unwrap<FileStorage>(info.This());
-    info.GetReturnValue().Set(obj->fs_.get().is_loaded());
-}
-
 NAN_METHOD(FileStorage::Hash)
 {
     FileStorage* obj = Nan::ObjectWrap::Unwrap<FileStorage>(info.This());
     std::stringstream ss;
-    ss << obj->fs_.get().hash(info[0]->Int32Value());
+    ss << obj->fs_.get().hash(libtorrent::file_index_t(info[0]->Int32Value()));
     info.GetReturnValue().Set(Nan::New(ss.str()).ToLocalChecked());
 }
 
 NAN_METHOD(FileStorage::Symlink)
 {
     FileStorage* obj = Nan::ObjectWrap::Unwrap<FileStorage>(info.This());
-    info.GetReturnValue().Set(Nan::New(obj->fs_.get().symlink(info[0]->Int32Value())).ToLocalChecked());
+    info.GetReturnValue().Set(Nan::New(obj->fs_.get().symlink(libtorrent::file_index_t(info[0]->Int32Value()))).ToLocalChecked());
 }
 
 NAN_METHOD(FileStorage::Mtime)
@@ -150,31 +143,31 @@ NAN_METHOD(FileStorage::FilePath)
         save_path = *Nan::Utf8String(info[1]);
     }
 
-    info.GetReturnValue().Set(Nan::New(obj->fs_.get().file_path(info[0]->Int32Value(), save_path)).ToLocalChecked());
+    info.GetReturnValue().Set(Nan::New(obj->fs_.get().file_path(libtorrent::file_index_t(info[0]->Int32Value()), save_path)).ToLocalChecked());
 }
 
 NAN_METHOD(FileStorage::FileName)
 {
     FileStorage* obj = Nan::ObjectWrap::Unwrap<FileStorage>(info.This());
-    info.GetReturnValue().Set(Nan::New(obj->fs_.get().file_name(info[0]->Int32Value()).to_string()).ToLocalChecked());
+    info.GetReturnValue().Set(Nan::New(obj->fs_.get().file_name(libtorrent::file_index_t(info[0]->Int32Value())).to_string()).ToLocalChecked());
 }
 
 NAN_METHOD(FileStorage::FileSize)
 {
     FileStorage* obj = Nan::ObjectWrap::Unwrap<FileStorage>(info.This());
-    info.GetReturnValue().Set(Nan::New(static_cast<double>(obj->fs_.get().file_size(info[0]->Int32Value()))));
+    info.GetReturnValue().Set(Nan::New(static_cast<double>(obj->fs_.get().file_size(libtorrent::file_index_t(info[0]->Int32Value())))));
 }
 
 NAN_METHOD(FileStorage::PadFileAt)
 {
     FileStorage* obj = Nan::ObjectWrap::Unwrap<FileStorage>(info.This());
-    info.GetReturnValue().Set(Nan::New(obj->fs_.get().pad_file_at(info[0]->Int32Value())));
+    info.GetReturnValue().Set(Nan::New(obj->fs_.get().pad_file_at(libtorrent::file_index_t(info[0]->Int32Value()))));
 }
 
 NAN_METHOD(FileStorage::FileOffset)
 {
     FileStorage* obj = Nan::ObjectWrap::Unwrap<FileStorage>(info.This());
-    info.GetReturnValue().Set(Nan::New(static_cast<double>(obj->fs_.get().file_offset(info[0]->Int32Value()))));
+    info.GetReturnValue().Set(Nan::New(static_cast<double>(obj->fs_.get().file_offset(libtorrent::file_index_t(info[0]->Int32Value())))));
 }
 
 NAN_METHOD(FileStorage::FilePathHash)
@@ -188,7 +181,7 @@ NAN_METHOD(FileStorage::FilePathHash)
         save_path = *Nan::Utf8String(info[1]);
     }
 
-    info.GetReturnValue().Set(Nan::New(obj->fs_.get().file_path_hash(info[0]->Int32Value(), save_path)));
+    info.GetReturnValue().Set(Nan::New(obj->fs_.get().file_path_hash(libtorrent::file_index_t(info[0]->Int32Value()), save_path)));
 }
 
 NAN_METHOD(FileStorage::AllPathHashes)
@@ -228,17 +221,17 @@ NAN_METHOD(FileStorage::Paths)
 NAN_METHOD(FileStorage::FileFlags)
 {
     FileStorage* obj = Nan::ObjectWrap::Unwrap<FileStorage>(info.This());
-    info.GetReturnValue().Set(Nan::New(obj->fs_.get().file_flags(info[0]->Int32Value())));
+    info.GetReturnValue().Set(Nan::New(static_cast<uint8_t>(obj->fs_.get().file_flags(libtorrent::file_index_t(info[0]->Int32Value())))));
 }
 
 NAN_METHOD(FileStorage::FileAbsolutePath)
 {
     FileStorage* obj = Nan::ObjectWrap::Unwrap<FileStorage>(info.This());
-    info.GetReturnValue().Set(Nan::New(obj->fs_.get().file_absolute_path(info[0]->Int32Value())));
+    info.GetReturnValue().Set(Nan::New(obj->fs_.get().file_absolute_path(libtorrent::file_index_t(info[0]->Int32Value()))));
 }
 
 NAN_METHOD(FileStorage::FileIndexAtOffset)
 {
     FileStorage* obj = Nan::ObjectWrap::Unwrap<FileStorage>(info.This());
-    info.GetReturnValue().Set(Nan::New(obj->fs_.get().file_index_at_offset(info[0]->NumberValue())));
+    info.GetReturnValue().Set(Nan::New(static_cast<int>(obj->fs_.get().file_index_at_offset(info[0]->Int32Value()))));
 }

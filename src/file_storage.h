@@ -9,7 +9,7 @@ namespace libtorrent
     class file_storage;
 }
 
-namespace lt
+namespace plt
 {
     class FileStorage : public Nan::ObjectWrap
     {
@@ -36,7 +36,6 @@ namespace lt
         static NAN_METHOD(PieceLength);
         static NAN_METHOD(PieceSize);
         static NAN_METHOD(Name);
-        static NAN_METHOD(IsLoaded);
         static NAN_METHOD(Hash);
         static NAN_METHOD(Symlink);
         static NAN_METHOD(Mtime);

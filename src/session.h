@@ -10,7 +10,7 @@ namespace libtorrent
     struct settings_pack;
 }
 
-namespace lt
+namespace plt
 {
     class Session : public Nan::ObjectWrap
     {

@@ -5,7 +5,7 @@
 
 #include "add_torrent_params.h"
 
-using lt::ReadResumeData;
+using plt::ReadResumeData;
 
 NAN_MODULE_INIT(ReadResumeData::Init)
 {
@@ -30,11 +30,9 @@ NAN_METHOD(ReadResumeData::DoReadResumeData)
             node::Buffer::Length(info[0]));
     }
 
+    std::vector<char> buffer(buf.begin(), buf.end());
     libtorrent::error_code ec;
-    libtorrent::add_torrent_params params = libtorrent::read_resume_data(
-        buf.c_str(),
-        static_cast<int>(buf.size()),
-        ec);
+    libtorrent::add_torrent_params params = libtorrent::read_resume_data(buffer, ec);
 
     if (ec)
     {

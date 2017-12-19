@@ -9,7 +9,7 @@ namespace libtorrent
     struct create_torrent;
 }
 
-namespace lt
+namespace plt
 {
     class CreateTorrent : public Nan::ObjectWrap
     {

@@ -9,7 +9,7 @@ namespace libtorrent
     struct settings_pack;
 }
 
-namespace lt
+namespace plt
 {
     class SettingsPack : public Nan::ObjectWrap
     {

@@ -12,15 +12,15 @@
 
 NAN_MODULE_INIT(InitAll)
 {
-    lt::BDecode::Init(target);
-    lt::BEncode::Init(target);
-    lt::CreateTorrent::Init(target);
-    lt::FileStorage::Init(target);
-    lt::ReadResumeData::Init(target);
-    lt::Session::Init(target);
-    lt::SettingsPack::Init(target);
-    lt::TorrentHandle::Init(target);
-    lt::TorrentInfo::Init(target);
+    plt::BDecode::Init(target);
+    plt::BEncode::Init(target);
+    plt::CreateTorrent::Init(target);
+    plt::FileStorage::Init(target);
+    plt::ReadResumeData::Init(target);
+    plt::Session::Init(target);
+    plt::SettingsPack::Init(target);
+    plt::TorrentHandle::Init(target);
+    plt::TorrentInfo::Init(target);
 }
 
 NODE_MODULE(porla_libtorrent, InitAll)

@@ -9,7 +9,7 @@ namespace libtorrent
     struct torrent_handle;
 }
 
-namespace lt
+namespace plt
 {
     class TorrentHandle : public Nan::ObjectWrap
     {
@@ -51,15 +51,10 @@ namespace lt
         static NAN_METHOD(IsValid);
         static NAN_METHOD(Pause);
         static NAN_METHOD(Resume);
-        static NAN_METHOD(StopWhenReady);
-        static NAN_METHOD(SetUploadMode);
-        static NAN_METHOD(SetShareMode);
         static NAN_METHOD(FlushCache);
-        static NAN_METHOD(ApplyIpFilter);
         static NAN_METHOD(ForceRecheck);
         static NAN_METHOD(SaveResumeData);
         static NAN_METHOD(NeedSaveResumeData);
-        static NAN_METHOD(AutoManaged);
         static NAN_METHOD(QueuePosition);
         static NAN_METHOD(QueuePositionUp);
         static NAN_METHOD(QueuePositionDown);
@@ -72,10 +67,10 @@ namespace lt
         static NAN_METHOD(PieceAvailability);
         static NAN_METHOD(PiecePriority);
         static NAN_METHOD(PrioritizePieces);
-        static NAN_METHOD(PiecePriorities);
+        static NAN_METHOD(GetPiecePriorities);
         static NAN_METHOD(FilePriority);
         static NAN_METHOD(PrioritizeFiles);
-        static NAN_METHOD(FilePriorities);
+        static NAN_METHOD(GetFilePriorities);
         static NAN_METHOD(ForceReannounce);
         static NAN_METHOD(ForceDhtAnnounce);
         static NAN_METHOD(ScrapeTracker);
@@ -83,7 +78,6 @@ namespace lt
         static NAN_METHOD(UploadLimit);
         static NAN_METHOD(SetDownloadLimit);
         static NAN_METHOD(DownloadLimit);
-        static NAN_METHOD(SetSequentialDownload);
         static NAN_METHOD(ConnectPeer);
         static NAN_METHOD(SetMaxUploads);
         static NAN_METHOD(MaxUploads);
@@ -91,7 +85,6 @@ namespace lt
         static NAN_METHOD(MaxConnections);
         static NAN_METHOD(MoveStorage);
         static NAN_METHOD(RenameFile);
-        static NAN_METHOD(SuperSeeding);
         static NAN_METHOD(InfoHash);
         static NAN_METHOD(Id);
 
