@@ -17,7 +17,7 @@ if ($Platform -eq "x86") {
 }
 
 if ($BoostPath -eq "" -or $BoostPath -eq $null) {
-    $BoostPath = "C:\Libraries\boost_1_65_1"
+    $BoostPath = "C:\Libraries\boost_1_63_0"
 }
 
 if ($OpenSSLPath -eq "" -or $OpenSSLPath -eq $null) {
