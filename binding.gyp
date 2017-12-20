@@ -103,7 +103,7 @@
                     ],
                     "libraries": [
                         '-l<(libtorrent_root)/lib/libtorrent.lib',
-                        '-l<(boostlib_root)/libboost_system-vc140-mt-s-1_63_0.lib',
+                        '-l<(boostlib_root)/libboost_system-vc140-mt-s-1_63.lib',
                         '-l<(openssl_root)/lib/libcrypto.lib',
                         '-l<(openssl_root)/lib/libssl.lib',
                         '-liphlpapi'
