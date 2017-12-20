@@ -82,7 +82,7 @@
                     }, # configurations
                     "copies": [{
                         'destination': '<(module_root_dir)/build/Release',
-                        'files': ['<(openssl_root)/libcrypto-1_1-x64.dll','<(openssl_root)/libssl-1_1-x64.dll']
+                        'files': ['<(openssl_root)/libeay32.dll','<(openssl_root)/ssleay32.dll']
                     }],
                     "defines": [
                         "_CRT_SECURE_NO_DEPRECATE",
@@ -104,8 +104,8 @@
                     "libraries": [
                         '-l<(libtorrent_root)/lib/libtorrent.lib',
                         '-l<(boostlib_root)/libboost_system-vc140-mt-s-1_63.lib',
-                        '-l<(openssl_root)/lib/libcrypto.lib',
-                        '-l<(openssl_root)/lib/libssl.lib',
+                        '-l<(openssl_root)/lib/libeay32.lib',
+                        '-l<(openssl_root)/lib/ssleay32.lib',
                         '-liphlpapi'
                     ]
                 },
@@ -137,7 +137,7 @@
                 [ 'OS=="win"', {
                     "copies": [
                         {
-                            "files": [ '<(openssl_root)/libcrypto-1_1-x64.dll','<(openssl_root)/libssl-1_1-x64.dll' ],
+                            "files": [ '<(openssl_root)/libeay32.dll','<(openssl_root)/ssleay32.dll' ],
                             "destination": "<(module_path)"
                         }
                     ]
